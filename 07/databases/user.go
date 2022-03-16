@@ -2,10 +2,12 @@ package databases
 
 import "LlBlog/models"
 
-func UserLoginCheck(id uint, psw string) bool {
+// databases应该关注于单纯的通用逻辑
+// 例如通过id获取记录这种
+func GetUserById(id uint) (*models.UserInfo, error) {
 	var u models.UserInfo
-	if err := DB.Where("id = ? AND password = ?", id, psw).Find(&u).Error; err != nil {
-		return false
+	if err := DB.Where("id = ?", id).Find(&u).Error; err != nil {
+		return nil, err
 	}
-	return true
+	return &u, nil
 }
