@@ -24,7 +24,13 @@ func Init() {
 	}
 
 	var err error
-	DB, err = gorm.Open("mysql", fmt.Sprintf("root:%s@(%s:3306)/lblog?charset=utf8mb4&parseTime=True&loc=Local"))
+	DB, err = gorm.Open(
+		"mysql",
+		fmt.Sprintf(
+			"root:%s@(%s:3306)/lblog?charset=utf8mb4&parseTime=True&loc=Local",
+			password, ip,
+		),
+	)
 	if err != nil {
 		panic(err)
 	}
