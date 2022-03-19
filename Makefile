@@ -7,4 +7,8 @@ stop:
 restart:
 	make stop
 	make run
-
+all:
+	make build
+	make restart
+logs:
+	docker logs -f bolgsrv
