@@ -15,5 +15,7 @@ COPY --from=builder /data/srv /usr/srv/srv
 WORKDIR /usr/srv
 
 ENV salt jqh8i912980j1rf1908wdj183
+ENV MYSQL_IP 172.20.241.37
+ENV MYSQL_PASSWORD balabalamiaomiaomiao
 ENV LANG C.UTF-8
 ENTRYPOINT ["./srv"]
