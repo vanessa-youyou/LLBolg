@@ -9,3 +9,8 @@ type UserInfo struct {
 	Introduction string `json:"introduction"`
 	Label        string `json:"label"`
 }
+
+func (u UserInfo) Clear() UserInfo {
+	u.Password = ""
+	return u
+}

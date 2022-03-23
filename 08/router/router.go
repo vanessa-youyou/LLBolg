@@ -11,6 +11,7 @@ func InitRouter(router *gin.Engine) {
 	{
 		userGroup.POST("/login", controllers.UserLogin)
 		userGroup.POST("/registered", controllers.UserRegistered)
+		userGroup.PUT("/updateInformation", controllers.UserInformationUpdate)
 	}
 	testGroup := router.Group("/test")
 	{

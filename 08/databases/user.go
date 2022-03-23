@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"github.com/jinzhu/gorm"
 )
 
@@ -47,6 +48,22 @@ func AccountInsert(u *models.UserInfo)  (bool, error){
 	u.Password = hex.EncodeToString(m.Sum(nil))
 	err := DB.Create(&u).Error
 	if err != nil{
+		return false, err
+	}
+	return true, nil
+}
+
+// 个人信息更新
+func UserInformationUpdate(u *models.UserInfo) (bool, error){
+	err := DB.Model(&u).Updates(models.UserInfo{
+		Name: u.Name,
+		Gender: u.Gender,
+		Introduction: u.Introduction,
+		Label: u.Label,
+	}).Error
+
+	if err != nil{
+		fmt.Println("数据库更新出错")
 		return false, err
 	}
 	return true, nil

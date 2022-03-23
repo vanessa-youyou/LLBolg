@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"LlBlog/core"
 	"LlBlog/errors"
 	"LlBlog/utils"
 
@@ -11,6 +12,15 @@ import (
 
 // 返回成功
 func Success(c *gin.Context) {
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+
+	if auth.IsLogin() {
+		utils.Return(c, gin.H{
+			"user": auth.User.Clear(),
+		})
+		return
+	}
+
 	utils.Return(c, gin.H{
 		"message": "登陆成功 这里应该跳转页面到 个人页面",
 	})
