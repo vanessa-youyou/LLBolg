@@ -47,3 +47,60 @@ func AddAccount(u models.UserInfo) bool {
 	}
 	return true
 }
+
+// UpdateUserInformation 进行更新
+func UpdateUserInformation(u models.UserInfo) bool {
+	t,err :=databases.UserInformationUpdate(&u)
+	if err != nil {
+		return false
+	}
+	return t
+}
+
+// 进行文章的保存
+func NewArticles(a models.ArticleInfo)  bool {
+	t,err := databases.WriteNewArticles(&a)
+	if err != nil {
+		return false
+	}
+	return t
+}
+
+
+
+// Like 点赞的结构体（赞 没有取消）
+type Like struct {
+	ID uint `json:"article_id" form:"article_id"`
+	PickIt bool `json:"pick_it" form:"pick_it" `
+}
+
+
+// UpdatArticle 进行更新
+func UpdatArticle (a *models.ArticleInfo) bool {
+	t,err := databases.GiveLike(a)
+	if err != nil {
+		return false
+	}
+	return t
+}
+
+// AuthorCheck 检查操作人是否为作者本人
+func AuthorCheck(authorId uint, articleId uint )  bool {
+	article,err := databases.FindArticleById(articleId)
+	if err != nil {
+		return false
+	}
+	if authorId != article.UserInfoID{
+		return false
+	}
+	return true
+}
+
+// ArticleDelete 删除函数
+func ArticleDelete(id uint)  bool {
+	t,err :=databases.DeleteArticle(id)
+	if err != nil {
+		return false
+	}
+	return t
+}

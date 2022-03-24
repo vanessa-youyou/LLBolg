@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 登录态获取
+// Response 登录态获取
 func Response() gin.HandlerFunc {
 	return func(c *gin.Context) {
 

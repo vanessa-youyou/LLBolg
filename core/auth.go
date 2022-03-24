@@ -42,7 +42,7 @@ func (r *AuthAuthorization) LoadAuthenticationInfo(c *gin.Context) {
 		recover()
 	}()
 
-	payload, err := c.Cookie("gin_cookie")
+	payload, err := c.Cookie(LLBlogCookieName)
 	if err != nil {
 		return
 	}
@@ -63,12 +63,12 @@ func (r *AuthAuthorization) LoadAuthenticationInfo(c *gin.Context) {
 // 设置cookie
 func (r *AuthAuthorization) SetCookie(c *gin.Context, aid uint) {
 	if aid == 0 {
-		c.SetCookie(LLBlogCookieName, "", -1, "/", "", false, false)
+		c.SetCookie(LLBlogCookieName, "", 9999, "/", "", false, false)
 		return
 	}
 	// 生成加密串
 	payload := GenerateToken(int(aid), CookieExpires)
-	c.SetCookie(LLBlogCookieName, payload, -1, "/", "", false, false)
+	c.SetCookie(LLBlogCookieName, payload, 9999, "/", "", false, false)
 }
 
 // 从数据库查找该用户
