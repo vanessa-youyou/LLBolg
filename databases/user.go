@@ -84,44 +84,6 @@ func WriteNewArticles(a *models.ArticleInfo) (bool, error) {
 	return true, nil
 }
 
-func GiveLike(a *models.ArticleInfo)  (bool, error) {
-	fmt.Println("a.text",a.Text)
-	fmt.Println("a.Title", a.Title)
-	err := DB.Model(&a).Updates(models.ArticleInfo{
-		Title: a.Title,
-		Text: a.Text,
-		AuthorID: a.AuthorID,
-		Original: a.Original,
-		PlacedTop: a.PlacedTop,
-		State: a.State,
-	}).Error
-	if err != nil{
-		fmt.Println("数据库更新出错")
-		return false, err
-	}
-	return true, nil
-}
-
-// FindArticleById 通过文章id 找到文章
-func FindArticleById(id uint) (*models.ArticleInfo, error) {
-	var u models.ArticleInfo
-	if err := DB.Where("id = ?", id).Find(&u).Error; err != nil {
-		return nil, err
-	}
-	return &u, nil
-}
-
-// DeleteArticle 删除文章
-func DeleteArticle(id uint)  (bool, error) {
-
-	err := DB.Where("id = ?", id).Delete(&models.ArticleInfo{}).Error
-	if err != nil{
-		fmt.Println("数据库删除出错")
-		return false, err
-	}
-	return true, nil
-}
-
 // ArticleRemove 删除文章（删除前需要查证操作人是不是作者）
 func ArticleRemove(a *models.ArticleInfo, userId uint) (bool, error) {
 	// 如果文章id = 要改的文章id 而且 文章作者 等于 操作者

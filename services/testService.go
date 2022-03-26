@@ -67,34 +67,6 @@ func NewArticles(a models.ArticleInfo)  bool {
 	return t
 }
 
-// Like 点赞的结构体（赞 没有取消）
-//type Like struct {
-//	ID uint `json:"article_id" form:"article_id"`
-//	PickIt bool `json:"pick_it" form:"pick_it" `
-//}
-
-// UpdatArticle 进行更新
-func UpdatArticle (a *models.ArticleInfo) bool {
-	t,err := databases.GiveLike(a)
-	if err != nil {
-		return false
-	}
-	return t
-}
-
-// AuthorCheck 检查操作人是否为作者本人
-func AuthorCheck(authorId uint, articleId uint)  bool {
-	article,err := databases.FindArticleById(articleId)
-	if err != nil {
-		return false
-	}
-	if authorId != article.AuthorID{
-		return false
-	}
-
-	return true
-}
-
 // RemoveArticle 检查是否为作者本人 并删除文章
 func RemoveArticle(a *models.ArticleInfo, userId uint) bool {
 	t,err := databases.ArticleRemove(a, userId)
