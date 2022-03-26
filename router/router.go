@@ -15,7 +15,7 @@ func InitRouter(router *gin.Engine) {
 
 		// 文章
 		userGroup.POST("/newArticles", controllers.CreatArticle)
-		userGroup.PUT("/giveLike", controllers.GiveLike)
+		userGroup.POST("/giveLike", controllers.GiveLike)
 		userGroup.PUT("/updateArticle", controllers.ModifyArticle)
 		userGroup.DELETE("/deleteArticles", controllers.DeleteArticle)
 	}

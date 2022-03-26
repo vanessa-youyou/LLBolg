@@ -36,5 +36,5 @@ func Init() {
 	}
 
 	// 应该放在这里
-	DB.AutoMigrate(&models.UserInfo{})
+	DB.AutoMigrate(&models.UserInfo{}, &models.ArticleInfo{}, &models.CommentInfo{}, &models.GiveLike{})
 }

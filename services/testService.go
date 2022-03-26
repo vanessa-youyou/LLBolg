@@ -24,7 +24,7 @@ func (l LoginUser) LoginCheck(user *models.UserInfo) bool {
 }
 
 func RegisteredNameCheck(u models.UserInfo) bool {
-	cn, err := databases.AccountRechecking(u.CustomerName)
+	cn, err := databases.AccountRechecking(u)
 	if err != nil {
 		// TODO 日志
 		return false
@@ -37,6 +37,7 @@ func RegisteredNameCheck(u models.UserInfo) bool {
 	return true
 }
 
+// AddAccount 增加用户
 func AddAccount(u models.UserInfo) bool {
 	t, err := databases.AccountInsert(&u)
 	if err != nil {
@@ -57,7 +58,7 @@ func UpdateUserInformation(u models.UserInfo) bool {
 	return t
 }
 
-// 进行文章的保存
+// NewArticles 进行文章的保存
 func NewArticles(a models.ArticleInfo)  bool {
 	t,err := databases.WriteNewArticles(&a)
 	if err != nil {
@@ -66,14 +67,11 @@ func NewArticles(a models.ArticleInfo)  bool {
 	return t
 }
 
-
-
 // Like 点赞的结构体（赞 没有取消）
-type Like struct {
-	ID uint `json:"article_id" form:"article_id"`
-	PickIt bool `json:"pick_it" form:"pick_it" `
-}
-
+//type Like struct {
+//	ID uint `json:"article_id" form:"article_id"`
+//	PickIt bool `json:"pick_it" form:"pick_it" `
+//}
 
 // UpdatArticle 进行更新
 func UpdatArticle (a *models.ArticleInfo) bool {
@@ -85,21 +83,40 @@ func UpdatArticle (a *models.ArticleInfo) bool {
 }
 
 // AuthorCheck 检查操作人是否为作者本人
-func AuthorCheck(authorId uint, articleId uint )  bool {
+func AuthorCheck(authorId uint, articleId uint)  bool {
 	article,err := databases.FindArticleById(articleId)
 	if err != nil {
 		return false
 	}
-	if authorId != article.UserInfoID{
+	if authorId != article.AuthorID{
 		return false
 	}
+
 	return true
 }
 
-// ArticleDelete 删除函数
-func ArticleDelete(id uint)  bool {
-	t,err :=databases.DeleteArticle(id)
-	if err != nil {
+// RemoveArticle 检查是否为作者本人 并删除文章
+func RemoveArticle(a *models.ArticleInfo, userId uint) bool {
+	t,err := databases.ArticleRemove(a, userId)
+	if err != nil{
+		return false
+	}
+	return t
+}
+
+// ArticleModify 检验是否为作者本人 并且更新文章
+func ArticleModify(a *models.ArticleInfo, userId uint) bool {
+	t,err := databases.ModifyArticle(a, userId)
+	if err != nil{
+		return false
+	}
+	return t
+}
+
+// PickArticle 点赞部分的函数
+func PickArticle(a *models.ArticleInfo, userId uint) bool {
+	t,err := databases.ArticlePick(a, userId)
+	if err != nil{
 		return false
 	}
 	return t

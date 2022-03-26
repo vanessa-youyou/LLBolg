@@ -92,9 +92,11 @@ func UserInformationUpdate(c *gin.Context){
 		return
 	}
 
-	// 获取登录人的id
+	// 获取登录人的id	id CustomerName	Password Label都不能用户自己改
 	userN.ID = auth.User.ID
 	userN.CustomerName = auth.User.CustomerName
+	userN.Password = auth.User.Password
+	userN.Label = auth.User.Label
 
 	// 进行更新
 	if ! services.UpdateUserInformation(userN){
@@ -118,6 +120,7 @@ func CreatArticle(c *gin.Context){
 	}
 	// 获取数据
 	var articleN models.ArticleInfo
+	articleN.AuthorID = auth.User.ID
 	err := c.ShouldBind(&articleN)
 	if err != nil {
 		utils.Return(c, err)
@@ -126,8 +129,13 @@ func CreatArticle(c *gin.Context){
 	}
 
 	// 绑定正确作者id
-	articleN.UserInfoID = auth.User.ID
-
+	articleN.AuthorID = auth.User.ID
+	// 状态有(1:草稿 draft 2：发布 published 3：发布-审核中 published-review 4：发布成功 5：驳回)
+	//这里不允许出现 草稿和发布之外的选项
+	if articleN.State != "draft" && articleN.State != "published"{
+		// 默认模式为 发布
+		articleN.State = "published"
+	}
 
 	// 进行保存
 	if ! services.NewArticles(articleN){
@@ -141,8 +149,8 @@ func CreatArticle(c *gin.Context){
 	})
 }
 
-// GiveLike 点赞
-func GiveLike(c *gin.Context)  {
+// GiveLike 新的点赞函数
+func GiveLike(c *gin.Context){
 	// 登陆检验
 	auth := c.MustGet("auth").(core.AuthAuthorization)
 	if !auth.IsLogin(){
@@ -150,38 +158,30 @@ func GiveLike(c *gin.Context)  {
 		return
 	}
 
-	// 获取数据
-	var ifLike services.Like
-	err := c.ShouldBind(&ifLike)
+	// 获取数据 传来文章结构比较好
+	var article models.ArticleInfo
+	err := c.ShouldBind(&article)
 	if err != nil {
 		utils.Return(c, err)
 		fmt.Println("未接受到传递的信息")
 		return
 	}
-
-	// 按照id找到这个文章
-	article,err := databases.FindArticleById(ifLike.ID)
-	if err != nil{
-		// 找不到此文章
-		utils.Return(c, errors.IsNotLogin)
-		return
-	}
-	// 进行点赞数
-	if ifLike.PickIt {
-		article.Praise += 1
-	}
-	if ! services.UpdatArticle(article){
+	// 操作者id
+	var userId = auth.User.ID
+	// 赞/取消
+	if !services.PickArticle(&article, userId){
 		utils.Return(c, errors.PickError)
 		return
 	}
 
 	// 成功
 	utils.Return(c, gin.H{
-		"message": "点赞成功 这里应该还在文章页面",
+		"message": "成功 这里应该还在文章页面",
 	})
+
 }
 
-// ModifyArticle 修改文章 只有作者可以
+// ModifyArticle 修改文章 只有作者可以(修改完成)
 func ModifyArticle(c *gin.Context) {
 	// 登陆检验
 	auth := c.MustGet("auth").(core.AuthAuthorization)
@@ -189,7 +189,6 @@ func ModifyArticle(c *gin.Context) {
 		utils.Return(c, errors.IsNotLogin)
 		return
 	}
-	fmt.Println("在UserInformationUpdate修改个人信息中 已经历过登陆验证 id为",auth.User.ID)
 	// 接收数据
 	var article models.ArticleInfo
 	err := c.ShouldBind(&article)
@@ -200,18 +199,20 @@ func ModifyArticle(c *gin.Context) {
 	}
 
 	// 查证 操作人 是否为文章作者
-	var authorId = auth.User.ID
-	if ! services.AuthorCheck(authorId, article.ID){
-		// 文章作者 和 操作人不匹配
-		utils.Return(c, errors.IsNotOneself)
-		return
+	var userId = auth.User.ID
+
+	// 处理 状态参数 （只能为发布/草稿 默认 发布）
+	if article.State != "draft" && article.State != "published"{
+		// 默认模式为 发布
+		article.State = "published"
 	}
 
-	// 是本人 进行保存
-	if ! services.UpdatArticle(&article){
+	// 新的查找and 修改 ;逻辑是(update 文章 where authorID == article.authorID)
+	if ! services.ArticleModify(&article, userId){
 		utils.Return(c, errors.UpdateError)
-		return
+		//	return
 	}
+
 	// 成功
 	utils.Return(c, gin.H{
 		"message": "修改成功 这里应该还在文章页面",
@@ -227,29 +228,23 @@ func DeleteArticle(c *gin.Context)  {
 		return
 	}
 	// 接收数据
-	var articleID1 models.ArticleInfo
-	err := c.ShouldBind(&articleID1)
+	var article models.ArticleInfo
+	err := c.ShouldBind(&article)
 	if err != nil {
 		utils.Return(c, err)
 		fmt.Println("未接受到传递的信息")
 		return
 	}
-	var articleID = articleID1.ID
 
-	// 查证 操作人 是否为文章作者
-	var authorId = auth.User.ID
-	if ! services.AuthorCheck(authorId, articleID){
-		// 文章作者 和 操作人不匹配
-		utils.Return(c, errors.IsNotOneself)
-		return
-	}
+	// 获得操作人的id
+	var userId = auth.User.ID
 
-	// 是本人 进行删除
-	if ! services.ArticleDelete(articleID){
+	// 1:检查操作者是否为 作者本人，是则删除，不是则报错
+	if ! services.RemoveArticle(&article, userId){
 		utils.Return(c, errors.DeleteArticleError)
-		return
+			return
 	}
-	// 成功
+
 	utils.Return(c, gin.H{
 		"message": "删除成功 这里应该回到当前页面",
 	})
