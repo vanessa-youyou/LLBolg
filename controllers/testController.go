@@ -99,7 +99,7 @@ func UserInformationUpdate(c *gin.Context){
 	userN.Label = auth.User.Label
 
 	// 进行更新
-	if ! services.UpdateUserInformation(userN){
+	if ! services.UpdateUserInformation(&userN){
 		utils.Return(c, errors.WrongUpdate)
 		return
 	}
@@ -249,3 +249,126 @@ func DeleteArticle(c *gin.Context)  {
 		"message": "删除成功 这里应该回到当前页面",
 	})
 }
+
+// PasswordUpdate 修改密码（1:旧密码 2：新密码 3：验证新密码）
+func PasswordUpdate(c *gin.Context)  {
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+	// 接收数据
+	var up = services.UpdatePassword{}
+	err := c.ShouldBind(&up)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+
+	var user = auth.User
+	// 1: 验证旧密码与新密码是否相等
+	if ! up.CheckPassword(user){
+		utils.Return(c, errors.UpdatePasswordError)
+		return
+	}
+	utils.Return(c, gin.H{
+		"message": "修改成功 这里应该跳转页面到 登录页面",
+	})
+}
+
+// WriteComment 新建评论
+func WriteComment(c *gin.Context)  {
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+
+	// 接收数据
+	var cm models.CommentInfo
+	err := c.ShouldBind(&cm)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+
+	// 修改操作人id
+	cm.UserID = auth.User.ID
+
+	if !services.CreatComment(&cm){
+		utils.Return(c, errors.CreatCommentError)
+		return
+	}
+
+	utils.Return(c, gin.H{
+		"message": "评论成功 这里应该跳转页面到 文章页面",
+	})
+}
+
+// LikeComment 点赞评论
+func LikeComment(c *gin.Context)  {
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+
+	// 获取数据 传来点赞结构比较好
+	var comment models.CommentInfo
+	err := c.ShouldBind(&comment)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+	// 操作者id
+	var userId = auth.User.ID
+	comment.UserID = auth.User.ID
+	// 赞/取消
+	if !services.PickComment(&comment, userId){
+		utils.Return(c, errors.PickError)
+		return
+	}
+
+	// 成功
+	utils.Return(c, gin.H{
+		"message": "成功 这里应该还在文章页面",
+	})
+
+}
+
+// DeleteComment 删除评论(只允许作者本人删除
+func DeleteComment(c *gin.Context)  {
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+
+	// 接收数据
+	var cm models.CommentInfo
+	err := c.ShouldBind(&cm)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+
+	var userId = auth.User.ID
+	if !services.RemoveComment(&cm, userId){
+		utils.Return(c, errors.DeleteCommentError)
+		return
+	}
+
+	// 成功
+	utils.Return(c, gin.H{
+		"message": "成功删除评论 这里应该还在文章页面",
+	})
+}
+

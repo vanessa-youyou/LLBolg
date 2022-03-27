@@ -12,6 +12,12 @@ type LoginUser struct {
 	Password     string `json:"password" form:"password" `
 }
 
+type UpdatePassword struct {
+	OriginalPassword string	`json:"original_password" form:"original_password"`
+	NewPassword string `json:"new_password" form:"new_password"`
+	AgainPassword string `json:"again_password" form:"again_password"`
+}
+
 func (l LoginUser) LoginCheck(user *models.UserInfo) bool {
 	// 这种判断密码是否相同的逻辑应该放在
 	// services里面，不能放在databases，因为不通用
@@ -50,8 +56,8 @@ func AddAccount(u models.UserInfo) bool {
 }
 
 // UpdateUserInformation 进行更新
-func UpdateUserInformation(u models.UserInfo) bool {
-	t,err :=databases.UserInformationUpdate(&u)
+func UpdateUserInformation(u *models.UserInfo) bool {
+	t,err :=databases.UserInformationUpdate(u)
 	if err != nil {
 		return false
 	}
@@ -88,6 +94,69 @@ func ArticleModify(a *models.ArticleInfo, userId uint) bool {
 // PickArticle 点赞部分的函数
 func PickArticle(a *models.ArticleInfo, userId uint) bool {
 	t,err := databases.ArticlePick(a, userId)
+	if err != nil{
+		return false
+	}
+	return t
+}
+
+// CheckPassword 旧密码的校验：
+func (u UpdatePassword) CheckPassword(user *models.UserInfo) bool {
+	d := []byte(u.OriginalPassword)
+	m := md5.New()
+	m.Write(d)
+	u.OriginalPassword = hex.EncodeToString(m.Sum(nil))
+	// 取出密码 （根据id取出信息）
+	var err error
+	user,err = databases.GetUserById(user.ID)
+	if err != nil{
+		return false
+	}
+
+	if u.OriginalPassword != user.Password{
+		return false
+	}
+	// 2：验证两个新密码是否相等
+	if u.NewPassword != u.AgainPassword{
+		return false
+	}else{
+		// 存储新的密码
+		d := []byte(u.NewPassword)
+		m := md5.New()
+		m.Write(d)
+		u.NewPassword = hex.EncodeToString(m.Sum(nil))
+		user.Password = u.NewPassword
+		t := UpdateUserInformation(user)
+		if !t{
+			return false
+		}
+		return true
+	}
+}
+
+// CreatComment 创建评论
+func CreatComment(cm *models.CommentInfo) bool {
+	// 找这个文章id是否存在 不存在则false
+	// 存在则创建
+	t,err := databases.NewComment(cm)
+	if err != nil{
+		return false
+	}
+	return t
+}
+
+// PickComment 点赞评论
+func PickComment(cm *models.CommentInfo, userId uint) bool {
+	t,err := databases.CommentPick(cm, userId)
+	if err != nil{
+		return false
+	}
+	return t
+}
+
+// RemoveComment 删除评论
+func RemoveComment(cm *models.CommentInfo, userId uint) bool {
+	t,err := databases.CommentDelete(cm, userId)
 	if err != nil{
 		return false
 	}

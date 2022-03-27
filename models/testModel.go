@@ -20,21 +20,28 @@ type ArticleInfo struct {
 
 }
 
+// CommentInfo 评论的表
 type CommentInfo struct {
 	ID				uint	`json:"id" gorm:"column:id;not null"`
 	UserID    		uint	`json:"user_id" gorm:"column:user_id;type:int unsigned;not null"`
 	ArticleID		uint	`json:"article_id" gorm:"column:article_id;type:int unsigned;not null"`
 	Content			string	`json:"content" gorm:"column:content"`
-	Like			int		`json:"like" gorm:"column:like"`
 }
 
-// GiveLike 点赞关系表
+// GiveLike 文章点赞关系表
 type GiveLike struct {
 	ID				uint	`json:"id" gorm:"column:id"`
 	UserID    		uint	`json:"user_id" gorm:"column:user_id;type:int unsigned;not null"`
 	ArticleID		uint	`json:"article_id" gorm:"column:article_id;type:int unsigned;not null"`
 }
 
+// CommentLike 评论的点赞
+type CommentLike struct {
+	ID				uint	`json:"id" gorm:"column:id"`
+	UserID    		uint	`json:"user_id" gorm:"column:user_id;type:int unsigned;not null"`
+	CommentID		uint	`json:"comment_id" gorm:"comment_id;type:int unsigned;not null"`
+	ArticleID		uint	`json:"article_id" gorm:"column:article_id;type:int unsigned;not null"`
+}
 func (u UserInfo) Clear() UserInfo {
 	u.Password = ""
 	return u
