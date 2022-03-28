@@ -42,9 +42,11 @@ type CommentLike struct {
 	CommentID		uint	`json:"comment_id" gorm:"comment_id;type:int unsigned;not null"`
 	ArticleID		uint	`json:"article_id" gorm:"column:article_id;type:int unsigned;not null"`
 }
+
 func (u UserInfo) Clear() UserInfo {
 	u.Password = ""
 	return u
+
 }
 
 

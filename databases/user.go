@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"strconv"
 )
 
 // databases应该关注于单纯的通用逻辑
@@ -98,12 +99,19 @@ func ArticleRemove(a *models.ArticleInfo, userId uint) (bool, error) {
 		fmt.Println("不是本人在操作")
 		return false, nil
 	}
-	var cl models.CommentLike
-	// 删除此文章相关的评论的点赞
-	err = DB.Model(&cl).Where("article_id = ?", a.ID).Delete(&models.CommentLike{}).Error
+
+	// 删除文章相关评论的点赞数目
+	// 1: 要找到所有的此文章的评论的id
+	var comments []models.CommentInfo
+	err = DB.Model(&models.CommentInfo{}).Where("article_id = ?", a.ID).Find(&comments).Error
 	if err != nil{
-		fmt.Println("数据库删除点赞出错")
 		return false, err
+	}
+	for i := 0; i < len(comments); i++ {
+		commentId := comments[i].ID
+		SetName := strconv.Itoa(int(commentId))
+		SetName += "LikeComment:"
+		Redis.Del(SetName)
 	}
 
 	// 删除此文章相关评论
@@ -115,12 +123,9 @@ func ArticleRemove(a *models.ArticleInfo, userId uint) (bool, error) {
 	}
 
 	// 删除此文章的点赞
-	var al models.GiveLike
-	err = DB.Model(&al).Where("article_id = ?", a.ID).Delete(&models.GiveLike{}).Error
-	if err != nil{
-		fmt.Println("数据库删除文章的赞出错")
-		return false, err
-	}
+	ArticleName := strconv.Itoa(int(a.ID))
+	ArticleName += "LikeArticle:"
+	Redis.Del(ArticleName)
 
 	// 删除文章
 	err = DB.Model(&a).Where("id = ? AND author_id = ?", a.ID, userId).Delete(&models.ArticleInfo{}).Error
@@ -149,37 +154,28 @@ func ModifyArticle(a *models.ArticleInfo, userId uint) (bool, error) {
 	return true, nil
 }
 
-// ArticlePick 点赞/取消点赞操作：
-func ArticlePick(a *models.ArticleInfo, userId uint) (bool, error) {
-	var count int = 0
-	// 1 检查表中 有无文章id =a.id 用户名id = userid 的 有就删除 else 创建
-	err := DB.Model(&models.GiveLike{}).Where("user_id = ? AND article_id = ?", userId, a.ID).Count(&count).Error
-
-	// 没有 创建
-	var L models.GiveLike
-	L.ArticleID = a.ID
-	L.UserID = userId
-	if count == 0{
-		err := DB.Create(&L).Error
-		if err != nil{
-			return false, err
-		}
-		return true, nil
+// LikeArticle 点赞文章 取消操作 -redis
+func LikeArticle(a *models.ArticleInfo, userId uint) (bool, error) {
+	// 用set set的名字为文章id 内容为 用户id
+	// 1:先查找 有无此 value
+	ArticleId := strconv.Itoa(int(a.ID))
+	ArticleId += "LikeArticle:"
+	UserId := strconv.Itoa(int(userId))
+	if !Redis.SIsMember(ArticleId, UserId).Val(){
+		// 如果没有 就把这个数据存入
+		Redis.SAdd(ArticleId, UserId)
 	}else{
-		err = DB.Model(L).Where("user_id = ? AND article_id = ?", userId, a.ID).Delete(&models.GiveLike{}).Error
-		if err != nil{
-			return false, err
-		}
-		return true, nil
-
+		// 如果存在 就删除
+		Redis.SRem(ArticleId, UserId)
 	}
+	return true, nil
 }
 
 // NewComment 按照文章id查文章
 func NewComment(cm *models.CommentInfo) (bool, error) {
-	// 1 查找文章
-	var count int = 0
-	// 1 检查表中
+
+	var count int
+	// 1 检查表中有无文章
 	err := DB.Model(&models.ArticleInfo{}).Where("id = ? ", cm.ArticleID).Count(&count).Error
 	if err != nil{
 		return false, err
@@ -195,47 +191,36 @@ func NewComment(cm *models.CommentInfo) (bool, error) {
 	return true, nil
 }
 
-// CommentPick 评论点赞 点赞/取消点赞操作：
-func CommentPick(cm *models.CommentInfo, userId uint) (bool, error) {
-	var count int = 0
-	// 1 检查表中 有无评论id =a.id 用户名id = userid 的 有就删除 else 创建
-	err := DB.Model(&models.CommentLike{}).Where("user_id = ? AND comment_id = ? AND article_id = ?", userId, cm.ID, cm.ArticleID).Count(&count).Error
-
-	// 没有 创建
-	var g models.CommentLike
-	g.UserID = userId
-	g.CommentID = cm.ID
-	g.ArticleID = cm.ArticleID
-	if count == 0{
-		err := DB.Create(&g).Error
-		if err != nil{
-			return false, err
-		}
-		return true, nil
+// LikeComment 评论点赞 点赞/取消点赞操作	-redis
+func LikeComment(cm *models.CommentInfo, userId uint) (bool, error){
+	// set的名字为评论的id 内容为 用户id
+	CommentId := strconv.Itoa(int(cm.ID))
+	CommentId += "LikeComment:"
+	UserId := strconv.Itoa(int(userId))
+	if !Redis.SIsMember(CommentId, UserId).Val(){
+		// 如果没有 就把这个数据存入
+		Redis.SAdd(CommentId, UserId)
 	}else{
-		err = DB.Model(g).Where("user_id = ? AND comment_id = ? AND article_id",  userId, cm.ID, cm.ArticleID).Delete(&models.CommentLike{}).Error
-		if err != nil{
-			return false, err
-		}
-		return true, nil
-
+		// 如果存在 就删除
+		Redis.SRem(CommentId, UserId)
 	}
+	return true, nil
 }
 
 // CommentDelete 删除评论
 func CommentDelete(cm *models.CommentInfo, userId uint) (bool, error) {
-	// 1检验操作人是不是评论人员：
+	// 检验操作人是不是评论人员：
 	if cm.UserID != userId{
 		return false, nil
 	}
-	// 删除所有的赞 where commentId = cm.Id
-	var g models.CommentLike
-	err := DB.Model(g).Where("comment_id = ?",cm.ID).Delete(&models.CommentLike{}).Error
-	if err != nil{
-		return false, err
-	}
+
+	// 删除这条评论 在 redis中的记录
+	SetName := strconv.Itoa(int(cm.ID))
+	SetName += "LikeComment:"
+	Redis.Del(SetName)
+
 	// 删除此条评论
-	err = DB.Model(cm).Where("id = ?",cm.ID).Delete(&models.CommentInfo{}).Error
+	err := DB.Model(cm).Where("id = ?",cm.ID).Delete(&models.CommentInfo{}).Error
 	if err != nil{
 		return false, err
 	}

@@ -16,7 +16,7 @@ var WriteError = New(2001,"写入失败")
 var PickError = New(2002,"点赞失败")
 var UpdateError = New(2003,"修改失败")
 var DeleteArticleError = New(2004,"删除文章失败")
-var IsNotOneself = New(2005,"不是本人在操作")
+//var IsNotOneself = New(2005,"不是本人在操作")
 
 
 var CreatCommentError = New(2006, "评论失败")

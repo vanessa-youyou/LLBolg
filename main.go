@@ -18,6 +18,7 @@ func main() {
 	router.InitRouter(rou)
 	// 初始化数据库
 	databases.Init()
+	databases.InitRedis()
 
 	rou.Run(":8080")
 }

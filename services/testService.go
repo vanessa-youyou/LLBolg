@@ -91,9 +91,9 @@ func ArticleModify(a *models.ArticleInfo, userId uint) bool {
 	return t
 }
 
-// PickArticle 点赞部分的函数
-func PickArticle(a *models.ArticleInfo, userId uint) bool {
-	t,err := databases.ArticlePick(a, userId)
+// ArticleLike 点赞文章-redis
+func ArticleLike(a *models.ArticleInfo, userId uint) bool {
+	t,err := databases.LikeArticle(a, userId)
 	if err != nil{
 		return false
 	}
@@ -145,9 +145,9 @@ func CreatComment(cm *models.CommentInfo) bool {
 	return t
 }
 
-// PickComment 点赞评论
-func PickComment(cm *models.CommentInfo, userId uint) bool {
-	t,err := databases.CommentPick(cm, userId)
+// CommentLike 点赞评论 redis
+func CommentLike(cm *models.CommentInfo, userId uint) bool {
+	t,err := databases.LikeComment(cm, userId)
 	if err != nil{
 		return false
 	}

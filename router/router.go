@@ -16,12 +16,12 @@ func InitRouter(router *gin.Engine) {
 
 		// 文章
 		userGroup.POST("/newArticles", controllers.CreatArticle)
-		userGroup.POST("/giveLike", controllers.GiveLike)
+		userGroup.POST("/PickArticle",controllers.PickArticle)	// redis
 		userGroup.PUT("/updateArticle", controllers.ModifyArticle)
 		userGroup.DELETE("/deleteArticles", controllers.DeleteArticle)
 		// 评论
 		userGroup.POST("/newComment", controllers.WriteComment)
-		userGroup.POST("/pickComment", controllers.LikeComment)
+		userGroup.POST("commentPick", controllers.CommentPick)	// redis
 		userGroup.DELETE("/deleteComment", controllers.DeleteComment)
 	}
 	testGroup := router.Group("/test")
@@ -30,4 +30,5 @@ func InitRouter(router *gin.Engine) {
 		testGroup.GET("/err", controllers.Err)
 		testGroup.GET("/err2", controllers.Err2)
 	}
+
 }
