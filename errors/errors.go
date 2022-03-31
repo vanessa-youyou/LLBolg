@@ -22,6 +22,11 @@ var DeleteArticleError = New(2004,"删除文章失败")
 var CreatCommentError = New(2006, "评论失败")
 var DeleteCommentError = New(2007, "评论删除失败")
 
+// ShowPageError 主页模块
+var ShowPageError = New(2007, "打开个人页面失败")
+var UploadError = New(2008, "上传照片失败")
+var ShowHeadPortraitError = New(2009, "获取照片失败")
+
 
 func New(code int, msg string) ErrorBase {
 	return ErrorBase{

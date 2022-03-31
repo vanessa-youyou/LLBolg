@@ -8,6 +8,7 @@ import (
 	"LlBlog/services"
 	"LlBlog/utils"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -364,5 +365,93 @@ func CommentPick(c *gin.Context)  {
 	// 成功
 	utils.Return(c, gin.H{
 		"message": "点赞/取消点赞 成功 这里应该还在文章页面",
+	})
+}
+
+// ShowSelf 展示个人主页
+func ShowSelf(c *gin.Context)  {
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+
+	// 获取页数
+	var page models.Page
+	err := c.ShouldBind(&page)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+
+	// 通过个人id来获取相关信息(姓名 昵称 自我介绍 等级 性别)
+	selfInformation := auth.User
+
+	// 获取文章
+	t, articlePage := services.FindAllArticleByUserId(selfInformation)
+	if !t{
+		fmt.Println("获取文章 error")
+		utils.Return(c, errors.ShowPageError)
+		return
+	}
+
+	// 翻页
+	// 获取文章后 能知道一共有几页，再按照现在的页面 制作切片 ，需要前端传过来的只有 当前page
+	// 设定1面展示 10片文章
+	page.PageSize = 10		// 一页展示10片文章
+	page.PageNum = len(articlePage)		//  总共有这么多片文章
+	fmt.Println("len(articlePage) =  " , len(articlePage))
+	beginA := page.PageNow  * 10
+	fmt.Println("beginA =  " , beginA)
+
+	var endA int
+	if beginA + 9 > page.PageNum{
+		endA = page.PageNum
+		fmt.Println("endA = ", endA)
+	}else {
+		endA = beginA + 9
+		fmt.Println("endA = ", endA)
+
+	}
+	pageArticle := articlePage[beginA : endA]		// pageArticle为 当前页面应该有的文章
+
+	// 返回
+	utils.Return(c, gin.H{
+		"pageMassge" : page,
+		"pageArticle" : pageArticle,
+		"selfPart" : selfInformation.Clear(),
+		"message": "获取成功 这里应该在个人页面",
+	})
+}
+
+// Upload 七牛云的上传 用post
+func Upload(c *gin.Context)  {
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+
+	file,fileHeader,_ := c.Request.FormFile("file")
+
+	fileSize := fileHeader.Size
+
+	url, err := services.UploadFile(file, fileSize)
+	if err != nil{
+		utils.Return(c, errors.UploadError)
+		return
+	}
+	// 这里应该 按照操作人id 存入数据库
+	if !services.UpdateHeadPortrait(url, auth.User){
+		utils.Return(c, errors.UploadError)
+		return
+	}
+
+	c.JSON(http.StatusOK,gin.H{
+		"message":"ok",
+		"url":url,
 	})
 }

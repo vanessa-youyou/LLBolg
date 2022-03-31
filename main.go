@@ -19,6 +19,7 @@ func main() {
 	// 初始化数据库
 	databases.Init()
 	databases.InitRedis()
+	databases.LoadQiniu()
 
 	rou.Run(":8080")
 }

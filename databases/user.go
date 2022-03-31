@@ -226,3 +226,45 @@ func CommentDelete(cm *models.CommentInfo, userId uint) (bool, error) {
 	}
 	return true, nil
 }
+
+// FindAllArticleByUserId 查找个人文章通过操作人ID
+func FindAllArticleByUserId(u *models.UserInfo) (bool, error, []models.ArticleInfo) {
+	var article []models.ArticleInfo
+	err := DB.Model(&article).Where("author_id = ?", u.ID).Find(&article).Error
+	if err != nil{
+		return false, err, nil
+	}
+	// 应该再在redis中 找到每个文章的点赞量
+	for i := 0; i < len(article); i++ {
+		// 遍历文章 通过文章id找到 赞的数量 评论的数量
+		ArticleName := strconv.Itoa(int(article[i].ID))
+		ArticleName += "LikeArticle:"
+		likeNum := Redis.SCard(ArticleName).Val()
+		fmt.Println("Redis.SCard(ArticleName).Val() is", likeNum)
+
+		// 评论的数量
+		var count int
+		err = DB.Model(&models.CommentInfo{}).Where("article_id = ?", article[i].ID).Count(&count).Error
+		if err != nil{
+			return false, err, nil
+		}
+
+		article[i].LikeNum = int(likeNum)
+		article[i].CommentsNum = count
+	}
+
+	return true, nil, article
+}
+
+// UpdateHeadPortrait 更新头像
+func UpdateHeadPortrait(url string, u *models.UserInfo) (bool, error) {
+	err := DB.Model(&u).Updates(models.UserInfo{
+		HeadPortrait: url,
+	}).Error
+
+	if err != nil{
+		fmt.Println("头像更新出错")
+		return false, err
+	}
+	return true, nil
+}

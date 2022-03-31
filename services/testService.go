@@ -3,8 +3,13 @@ package services
 import (
 	"LlBlog/databases"
 	"LlBlog/models"
+	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
+	"github.com/qiniu/api.v7/v7/auth/qbox"
+	"github.com/qiniu/api.v7/v7/storage"
+	"mime/multipart"
 )
 
 type LoginUser struct {
@@ -162,3 +167,56 @@ func RemoveComment(cm *models.CommentInfo, userId uint) bool {
 	}
 	return t
 }
+
+// FindAllArticleByUserId 通过操作人id 获取所有文章
+func FindAllArticleByUserId(u *models.UserInfo) (bool, []models.ArticleInfo){
+	var articlePage []models.ArticleInfo
+	t,err, articlePage:= databases.FindAllArticleByUserId(u)
+	if err != nil || articlePage == nil{
+		fmt.Println("service error 通过操作人id 获取所有文章")
+		fmt.Println(err)
+		return false, nil
+	}
+	return t, articlePage
+}
+
+// UploadFile 上传
+func UploadFile(file multipart.File, fileSize int64) (string, error) {
+	var Bucket = databases.Bucket
+	var AccessKey = databases.AccessKey
+	var ImgUrl = databases.QiniuServer
+	var SecretKey =databases.SecretKey
+	putPolicy := storage.PutPolicy{
+		Scope: Bucket,
+	}
+	mac := qbox.NewMac(AccessKey,SecretKey)
+	upToken := putPolicy.UploadToken(mac)
+
+	cfg := storage.Config{
+		Zone: &storage.ZoneHuanan,
+		UseHTTPS: false,
+	}
+
+	putExtra := storage.PutExtra{}
+
+	formUploader := storage.NewFormUploader(&cfg)
+	ret := storage.PutRet{}
+	err := formUploader.PutWithoutKey(context.Background(),&ret,upToken,file,fileSize,&putExtra)
+
+	if err != nil{
+		return "",err
+	}
+	url := ImgUrl + ret.Key
+	return url, nil
+}
+
+// UpdateHeadPortrait 上传/更新头像
+func UpdateHeadPortrait(url string, user *models.UserInfo) bool {
+	// 对此人进行update 头像
+	t,err  := databases.UpdateHeadPortrait(url, user)
+	if err != nil {
+		return false
+	}
+	return t
+}
+

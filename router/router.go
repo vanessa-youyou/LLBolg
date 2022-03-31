@@ -13,6 +13,7 @@ func InitRouter(router *gin.Engine) {
 		userGroup.POST("/registered", controllers.UserRegistered)
 		userGroup.PUT("/updateInformation", controllers.UserInformationUpdate)
 		userGroup.PUT("/updatePassword", controllers.PasswordUpdate)
+		userGroup.POST("/upload", controllers.Upload)
 
 		// 文章
 		userGroup.POST("/newArticles", controllers.CreatArticle)
@@ -23,6 +24,9 @@ func InitRouter(router *gin.Engine) {
 		userGroup.POST("/newComment", controllers.WriteComment)
 		userGroup.POST("commentPick", controllers.CommentPick)	// redis
 		userGroup.DELETE("/deleteComment", controllers.DeleteComment)
+
+		// 前段页面展示部分
+		userGroup.GET("/selfPage", controllers.ShowSelf)
 	}
 	testGroup := router.Group("/test")
 	{
