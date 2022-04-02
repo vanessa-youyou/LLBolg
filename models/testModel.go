@@ -45,20 +45,12 @@ type CommentLike struct {
 	ArticleID		uint	`json:"article_id" gorm:"column:article_id;type:int unsigned;not null"`
 }
 
-// ArticleSelf 个人page的文章模块
-//type ArticleSelf struct {
-//	ID          	uint	`json:"id"`
-//	Title			string	`json:"title" gorm:"column:title;not null"`
-//	Text 			string 	` json:"text" gorm:"column:text;not null"`
-//	AuthorID    	uint	`json:"author_id" gorm:"column:author_id;type:int unsigned;not null"`
-//	Original		int8	`json:"original" gorm:"column:original;not null"`
-//	PlacedTop		int8	`json:"placed_top" gorm:"column:placed_top;not null"`
-//	State			string	`json:"state" gorm:"column:state;not null"`
-//	LikeNum			int		`json:"like_num"`
-//	CommentNum		int		`json:"comment_num"`
-//
-//}
-
+// search 查询
+type Search struct {
+	SearchWay	bool	`json:"search_way"`	// 0: 模糊 1：准确
+	Check		string	`json:"check"`
+	Content		string	`json:"content"`
+}
 // Page 分页
 type Page struct {
 	PageNow		int 	`json:"now_page"`

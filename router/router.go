@@ -27,7 +27,10 @@ func InitRouter(router *gin.Engine) {
 
 		// 前段页面展示部分
 		userGroup.GET("/selfPage", controllers.ShowSelf)
-	}
+
+		// 查找部分的接口
+		userGroup.GET("/searchArticles", controllers.SearchArticles)	// 按照标题名称 模糊查找
+		}
 	testGroup := router.Group("/test")
 	{
 		testGroup.GET("/succ", controllers.Success)

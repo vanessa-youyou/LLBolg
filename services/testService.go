@@ -170,7 +170,6 @@ func RemoveComment(cm *models.CommentInfo, userId uint) bool {
 
 // FindAllArticleByUserId 通过操作人id 获取所有文章
 func FindAllArticleByUserId(u *models.UserInfo) (bool, []models.ArticleInfo){
-	var articlePage []models.ArticleInfo
 	t,err, articlePage:= databases.FindAllArticleByUserId(u)
 	if err != nil || articlePage == nil{
 		fmt.Println("service error 通过操作人id 获取所有文章")
@@ -220,3 +219,12 @@ func UpdateHeadPortrait(url string, user *models.UserInfo) bool {
 	return t
 }
 
+// SearchArticle 查找
+func SearchArticle(search models.Search) ([]models.ArticleInfo, bool) {
+	t,err, articles := databases.AccurateSearch(search)
+		if err != nil || !t{
+			fmt.Println(err)
+			return nil, false
+		}
+		return articles,t
+}

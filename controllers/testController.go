@@ -455,3 +455,32 @@ func Upload(c *gin.Context)  {
 		"url":url,
 	})
 }
+
+// SearchArticles 查询
+func SearchArticles(c *gin.Context)  {
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+
+	// 接收数据
+	var search models.Search
+	err := c.ShouldBind(&search)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+	articles, t := services.SearchArticle(search)
+	if !t{
+		utils.Return(c, errors.SearchERROR)
+		return
+	}
+	// 一起返回
+	utils.Return(c, gin.H{
+		"message": " 查找成功 这里应该还在文章页面",
+		"articles": articles,
+	})
+}

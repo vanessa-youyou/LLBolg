@@ -268,3 +268,41 @@ func UpdateHeadPortrait(url string, u *models.UserInfo) (bool, error) {
 	}
 	return true, nil
 }
+
+// AccurateSearch 查询
+func AccurateSearch(search models.Search) (bool, error, []models.ArticleInfo) {
+	var articles []models.ArticleInfo
+	var err error
+	if search.SearchWay && search.Check == "title"{
+		err = DB.Model(&models.ArticleInfo{}).Where("title = ?", search.Content).Find(&articles).Error
+	}else if !search.SearchWay && search.Check == "title" {
+		err = DB.Model(&models.ArticleInfo{}).Where("title LIKE ?", search.Content+"%").Find(&articles).Error
+	}else if search.SearchWay && search.Check == "text" {
+		err = DB.Model(&models.ArticleInfo{}).Where("text = ?", search.Content).Find(&articles).Error
+	}else if !search.SearchWay && search.Check == "text"{
+		err = DB.Model(&models.ArticleInfo{}).Where("text LIKE ?", search.Content).Find(&articles).Error
+	}
+	if err != nil{
+		fmt.Println("查找文章失败")
+		return false, err, nil
+	}
+	for i:= 0;i<len(articles); i++{
+		// 遍历文章 通过文章id找到 赞的数量 评论的数量
+		ArticleName := strconv.Itoa(int(articles[i].ID))
+		ArticleName += "LikeArticle:"
+		likeNum := Redis.SCard(ArticleName).Val()
+		fmt.Println("Redis.SCard(ArticleName).Val() is", likeNum)
+
+		// 评论的数量
+		var count int
+		err = DB.Model(&models.CommentInfo{}).Where("article_id = ?", articles[i].ID).Count(&count).Error
+		if err != nil{
+			return false, err, nil
+		}
+
+		articles[i].LikeNum = int(likeNum)
+		articles[i].CommentsNum = count
+	}
+	return true, nil, articles
+
+}
