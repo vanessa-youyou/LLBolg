@@ -45,7 +45,7 @@ type CommentLike struct {
 	ArticleID		uint	`json:"article_id" gorm:"column:article_id;type:int unsigned;not null"`
 }
 
-// search 查询
+// Search 查询
 type Search struct {
 	SearchWay	bool	`json:"search_way"`	// 0: 模糊 1：准确
 	Check		string	`json:"check"`

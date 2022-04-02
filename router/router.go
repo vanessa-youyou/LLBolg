@@ -29,7 +29,8 @@ func InitRouter(router *gin.Engine) {
 		userGroup.GET("/selfPage", controllers.ShowSelf)
 
 		// 查找部分的接口
-		userGroup.GET("/searchArticles", controllers.SearchArticles)	// 按照标题名称 模糊查找
+		userGroup.POST("/searchArticles", controllers.SearchArticles)	// 查找文章
+		userGroup.POST("/searchUser", controllers.SearchUSer)		// 查找用户信息
 		}
 	testGroup := router.Group("/test")
 	{

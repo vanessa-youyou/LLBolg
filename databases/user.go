@@ -269,18 +269,24 @@ func UpdateHeadPortrait(url string, u *models.UserInfo) (bool, error) {
 	return true, nil
 }
 
-// AccurateSearch 查询
+// AccurateSearch 查询用户
 func AccurateSearch(search models.Search) (bool, error, []models.ArticleInfo) {
 	var articles []models.ArticleInfo
 	var err error
+	fmt.Println(search.SearchWay,"   ",search.Content,"   ",search.Check)
 	if search.SearchWay && search.Check == "title"{
+		fmt.Println("1")
 		err = DB.Model(&models.ArticleInfo{}).Where("title = ?", search.Content).Find(&articles).Error
+
 	}else if !search.SearchWay && search.Check == "title" {
+		fmt.Println("2")
 		err = DB.Model(&models.ArticleInfo{}).Where("title LIKE ?", search.Content+"%").Find(&articles).Error
 	}else if search.SearchWay && search.Check == "text" {
+		fmt.Println("3")
 		err = DB.Model(&models.ArticleInfo{}).Where("text = ?", search.Content).Find(&articles).Error
 	}else if !search.SearchWay && search.Check == "text"{
-		err = DB.Model(&models.ArticleInfo{}).Where("text LIKE ?", search.Content).Find(&articles).Error
+		fmt.Println("4")
+		err = DB.Model(&models.ArticleInfo{}).Where("text LIKE ?", search.Content+"%").Find(&articles).Error
 	}
 	if err != nil{
 		fmt.Println("查找文章失败")
@@ -305,4 +311,26 @@ func AccurateSearch(search models.Search) (bool, error, []models.ArticleInfo) {
 	}
 	return true, nil, articles
 
+}
+
+// SearchUser 查询用户
+func SearchUser(search models.Search) (bool, error, []models.UserInfo) {
+	var user []models.UserInfo
+	var err error
+	if search.SearchWay{
+		// 准确查询
+		err = DB.Model(&models.UserInfo{}).Where("name = ?", search.Content).Find(&user).Error
+	}else{
+		err = DB.Model(&models.UserInfo{}).Where("name LIKE ?", search.Content+ "%").Find(&user).Error
+	}
+	if err != nil{
+		fmt.Println("查找失败")
+		return false, err, nil
+	}
+	for i:=1; i<len(user); i++{
+		// 不允许访客看到 customer_name,password,id
+		user[i].CustomerName = ""
+		user[i].Password = ""
+	}
+	return true, nil, user
 }

@@ -219,12 +219,22 @@ func UpdateHeadPortrait(url string, user *models.UserInfo) bool {
 	return t
 }
 
-// SearchArticle 查找
+// SearchArticle 查找文章
 func SearchArticle(search models.Search) ([]models.ArticleInfo, bool) {
 	t,err, articles := databases.AccurateSearch(search)
 		if err != nil || !t{
-			fmt.Println(err)
+			fmt.Println(err,"111111111111server")
 			return nil, false
 		}
 		return articles,t
+}
+
+// SearchUser 查找用户
+func SearchUser(search models.Search) ([]models.UserInfo, bool) {
+
+	t,err,users := databases.SearchUser(search)
+	if err != nil || !t{
+		return nil, false
+	}
+	return users, true
 }

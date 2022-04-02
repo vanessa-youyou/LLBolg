@@ -456,7 +456,7 @@ func Upload(c *gin.Context)  {
 	})
 }
 
-// SearchArticles 查询
+// SearchArticles 查询文章
 func SearchArticles(c *gin.Context)  {
 	// 登陆检验
 	auth := c.MustGet("auth").(core.AuthAuthorization)
@@ -464,7 +464,7 @@ func SearchArticles(c *gin.Context)  {
 		utils.Return(c, errors.IsNotLogin)
 		return
 	}
-
+	fmt.Println("1111111进入controller")
 	// 接收数据
 	var search models.Search
 	err := c.ShouldBind(&search)
@@ -473,7 +473,11 @@ func SearchArticles(c *gin.Context)  {
 		fmt.Println("未接受到传递的信息")
 		return
 	}
+	fmt.Println("接收数据完毕")
+	fmt.Println(search.SearchWay,"  22 ", search.Content,"  33", search.Content)
+
 	articles, t := services.SearchArticle(search)
+	fmt.Println("services完毕")
 	if !t{
 		utils.Return(c, errors.SearchERROR)
 		return
@@ -482,5 +486,34 @@ func SearchArticles(c *gin.Context)  {
 	utils.Return(c, gin.H{
 		"message": " 查找成功 这里应该还在文章页面",
 		"articles": articles,
+	})
+}
+
+// SearchUSer 查找用户
+func SearchUSer(c *gin.Context){
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+
+	// 	获取参数
+	var information models.Search
+	err := c.ShouldBind(&information)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+	users, t := services.SearchUser(information)
+	if !t{
+		utils.Return(c, errors.SearchERROR)
+		return
+	}
+
+	utils.Return(c, gin.H{
+		"message": " 查找成功 这里应该还在文章页面",
+		"Users": users,
 	})
 }
