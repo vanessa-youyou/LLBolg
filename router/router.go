@@ -34,6 +34,9 @@ func InitRouter(router *gin.Engine) {
 
 		// 展示文章详情
 		userGroup.POST("/articleDetails", controllers.ArticleDetails)
+		// 收藏
+		userGroup.POST("/collectionArticle", controllers.CollectionArticle)
+		userGroup.DELETE("/CancelCollectionArticle", controllers.CancelCollectionArticle)
 		}
 	testGroup := router.Group("/test")
 	{

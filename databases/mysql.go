@@ -40,5 +40,6 @@ func Init() {
 					&models.ArticleInfo{},
 					&models.CommentInfo{},
 					&models.GiveLike{},
-					&models.CommentLike{})
+					&models.CommentLike{},
+					&models.Collection{})
 }

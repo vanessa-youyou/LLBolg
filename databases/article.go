@@ -170,3 +170,33 @@ func ArticleDetails(a *models.ArticleInfo) (bool, []models.CommentInfo) {
 
 	return true, comments
 }
+
+// CollectionArticle 收藏文章
+func CollectionArticle(coll *models.Collection) (bool, error) {
+	var count int
+	// 1 检查表中有无文章
+	err := DB.Model(&models.ArticleInfo{}).Where("id = ? ", coll.ArticleID).Count(&count).Error
+	if err != nil{
+		return false, err
+	}
+	if count == 0{
+		return false, nil
+	}
+	// 存在 进行收藏
+	err = DB.Create(&coll).Error
+	if err != nil{
+		return false, err
+	}
+	return true, nil
+}
+
+// CancelCollectionArticle 取消收藏
+func CancelCollectionArticle(coll *models.Collection) (bool, error) {
+	// 删除文章
+	err := DB.Model(&coll).Where("user_id = ? AND article_id = ?", coll.UserID, coll.ArticleID).Delete(&models.Collection{}).Error
+	if err != nil{
+		fmt.Println("数据库删除出错")
+		return false, err
+	}
+	return true, nil
+}

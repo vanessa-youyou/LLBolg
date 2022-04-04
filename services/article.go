@@ -124,3 +124,22 @@ func SearchArticle(search models.Search) ([]models.ArticleInfo, bool) {
 	}
 	return articles,t
 }
+
+// CollectionArticle 收藏文章
+func CollectionArticle( collection *models.Collection) bool {
+	// 在数据库中查找是不是真的有这个文章，有的话就收藏 没有就失败
+	t,err := databases.CollectionArticle(collection)
+	if err != nil{
+		return false
+	}
+	return t
+}
+
+// CancelCollectionArticle 取消收藏
+func CancelCollectionArticle(collection *models.Collection) bool{
+	t,err := databases.CancelCollectionArticle(collection)
+	if err != nil{
+		return false
+	}
+	return t
+}

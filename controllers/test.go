@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 返回成功
+// Success 返回成功
 func Success(c *gin.Context) {
 	auth := c.MustGet("auth").(core.AuthAuthorization)
 

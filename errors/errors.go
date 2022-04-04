@@ -29,6 +29,8 @@ var ShowHeadPortraitError = New(2009, "获取照片失败")
 
 var SearchERROR = New(2010, "查找文章失败")
 var ObtainDetailsError = New(2011, "打开文章详情失败")
+var CollectionError = New(2012, "收藏文章失败")
+
 
 
 func New(code int, msg string) ErrorBase {

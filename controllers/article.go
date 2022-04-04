@@ -328,4 +328,69 @@ func ArticleDetails(c *gin.Context)  {
 		"article": articles,
 		"comment": comments,
 	})
+
+}
+
+// CollectionArticle 收藏
+func CollectionArticle(c *gin.Context){
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+
+	// 	获取参数
+	var article models.ArticleInfo
+	err := c.ShouldBind(&article)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+
+	var collection models.Collection
+	collection.UserID = auth.User.ID
+	collection.ArticleID = article.ID
+
+	if !services.CollectionArticle(&collection){
+		utils.Return(c, errors.CollectionError)
+		return
+	}
+	utils.Return(c, gin.H{
+		"message": " 收藏成功 这里应该还在文章页面",
+
+	})
+}
+
+// CancelCollectionArticle 取消收藏
+func CancelCollectionArticle(c *gin.Context){
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+
+	// 	获取参数
+	var article models.ArticleInfo
+	err := c.ShouldBind(&article)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+
+	var collection models.Collection
+	collection.UserID = auth.User.ID
+	collection.ArticleID = article.ID
+	if !services.CancelCollectionArticle(&collection){
+		utils.Return(c, errors.CollectionError)
+		return
+	}
+
+	utils.Return(c, gin.H{
+		"message": " 取消成功 这里应该还在文章页面",
+
+	})
 }

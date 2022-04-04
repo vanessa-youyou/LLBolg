@@ -10,6 +10,7 @@ type UserInfo struct {
 	Label        string `json:"label"`
 	HeadPortrait	string	`json:"head_portrait" gorm:"head_portrait"`
 }
+
 type ArticleInfo struct {
 	ID          	uint	`json:"id"`
 	Title			string	`json:"title" gorm:"column:title;not null"`
@@ -59,11 +60,14 @@ type Page struct {
 	PageSize	int		`json:"page_size"`
 }
 
+// Collection 收藏
+type Collection struct {
+	ArticleID		uint	`json:"article_id" gorm:"column:article_id;type:int unsigned;not null"`
+	UserID    		uint	`json:"user_id" gorm:"column:user_id;type:int unsigned;not null"`
+}
 
 func (u UserInfo) Clear() UserInfo {
 	u.Password = ""
 	return u
 
 }
-
-
