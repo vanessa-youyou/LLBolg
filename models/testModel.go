@@ -28,6 +28,7 @@ type CommentInfo struct {
 	UserID    		uint	`json:"user_id" gorm:"column:user_id;type:int unsigned;not null"`
 	ArticleID		uint	`json:"article_id" gorm:"column:article_id;type:int unsigned;not null"`
 	Content			string	`json:"content" gorm:"column:content"`
+	LikeNum			int		`json:"like_num" gorm:"like_num"`
 }
 
 // GiveLike 文章点赞关系表

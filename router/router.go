@@ -31,6 +31,9 @@ func InitRouter(router *gin.Engine) {
 		// 查找部分的接口
 		userGroup.POST("/searchArticles", controllers.SearchArticles)	// 查找文章
 		userGroup.POST("/searchUser", controllers.SearchUSer)		// 查找用户信息
+
+		// 展示文章详情
+		userGroup.POST("/articleDetails", controllers.ArticleDetails)
 		}
 	testGroup := router.Group("/test")
 	{

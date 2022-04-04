@@ -28,6 +28,7 @@ var UploadError = New(2008, "上传照片失败")
 var ShowHeadPortraitError = New(2009, "获取照片失败")
 
 var SearchERROR = New(2010, "查找文章失败")
+var ObtainDetailsError = New(2011, "打开文章详情失败")
 
 
 func New(code int, msg string) ErrorBase {
