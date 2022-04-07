@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"LlBlog/core"
+	"LlBlog/databases"
 	"LlBlog/errors"
 	"LlBlog/models"
 	"LlBlog/services"
@@ -29,15 +30,17 @@ func CreatArticle(c *gin.Context){
 
 	// 绑定正确作者id
 	articleN.AuthorID = auth.User.ID
-	// 状态有(1:草稿 draft 2:发布 published 3:发布-审核中 published-review 4:发布成功 5:驳回)
-	//这里不允许出现 草稿和发布之外的选项
-	if articleN.State != "draft" && articleN.State != "published"{
+	// 状态有(1:草稿  2:发布  3:发布-审核中 4:发布成功 5:驳回 6:撤销)
+	//这里不允许出现撤销 草稿和发布之外的选项
+	if articleN.State != 1 && articleN.State != 2 && articleN.State != 6{
 		// 默认模式为 发布
-		articleN.State = "published"
+		articleN.State = 2
 	}
 
 	// 进行保存
-	if ! services.NewArticles(articleN){
+	t := databases.WriteNewArticles(&articleN)
+
+	if !t{
 		utils.Return(c, errors.WriteError)
 		return
 	}
@@ -69,9 +72,9 @@ func ModifyArticle(c *gin.Context) {
 	var userId = auth.User.ID
 
 	// 处理 状态参数 （只能为发布/草稿 默认:发布）
-	if article.State != "draft" && article.State != "published"{
+	if article.State != 1 && article.State != 2 && article.State != 6{
 		// 默认模式为 发布
-		article.State = "published"
+		article.State = 2
 	}
 
 	// 新的查找and 修改 逻辑是(update 文章 where authorID == article.authorID)
@@ -138,7 +141,8 @@ func WriteComment(c *gin.Context)  {
 	// 修改操作人id
 	cm.UserID = auth.User.ID
 
-	if !services.CreatComment(&cm){
+	t := databases.NewComment(&cm)
+	if !t{
 		utils.Return(c, errors.CreatCommentError)
 		return
 	}
@@ -246,20 +250,15 @@ func SearchArticles(c *gin.Context)  {
 		utils.Return(c, errors.IsNotLogin)
 		return
 	}
-	fmt.Println("1111111进入controller")
 	// 接收数据
 	var search models.Search
 	err := c.ShouldBind(&search)
 	if err != nil {
 		utils.Return(c, err)
-		fmt.Println("未接受到传递的信息")
 		return
 	}
-	fmt.Println("接收数据完毕")
-	fmt.Println(search.SearchWay,"  22 ", search.Content,"  33", search.Content)
 
 	articles, t := services.SearchArticle(search)
-	fmt.Println("services完毕")
 	if !t{
 		utils.Return(c, errors.SearchERROR)
 		return
@@ -391,6 +390,5 @@ func CancelCollectionArticle(c *gin.Context){
 
 	utils.Return(c, gin.H{
 		"message": " 取消成功 这里应该还在文章页面",
-
 	})
 }

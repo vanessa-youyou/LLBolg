@@ -8,19 +8,20 @@ import (
 )
 
 // NewArticles 进行文章的保存
-func NewArticles(a models.ArticleInfo)  bool {
-	err := databases.DB.Create(a).Error
-	if err != nil{
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
+//func NewArticles(a models.ArticleInfo)  bool {
+//	err := databases.DB.Create(a).Error
+//	if err != nil{
+//		fmt.Println(err)
+//		return false
+//	}
+//	return true
+//}
 
 // RemoveArticle 检查是否为作者本人 并删除文章
 func RemoveArticle(a *models.ArticleInfo, userId uint) bool {
 	t,err := databases.ArticleRemove(a, userId)
 	if err != nil{
+		fmt.Println(err)
 		return false
 	}
 	return t
@@ -30,6 +31,7 @@ func RemoveArticle(a *models.ArticleInfo, userId uint) bool {
 func ArticleModify(a *models.ArticleInfo, userId uint) bool {
 	t,err := databases.ModifyArticle(a, userId)
 	if err != nil{
+		fmt.Println(err)
 		return false
 	}
 	return t
@@ -39,38 +41,39 @@ func ArticleModify(a *models.ArticleInfo, userId uint) bool {
 func ArticleLike(a *models.ArticleInfo, userId uint) bool {
 	t,err := databases.LikeArticle(a, userId)
 	if err != nil{
+		fmt.Println(err)
 		return false
 	}
 	return t
 }
 
 // CreatComment 创建评论
-func CreatComment(cm *models.CommentInfo) bool {
-	// 找这个文章id是否存在 不存在则false
-	// 存在则创建
-
-	var count = 0
-	err := databases.DB.Model(&models.ArticleInfo{}).Where("id = ? ", cm.ArticleID).Count(&count).Error
-	if err != nil{
-		fmt.Println(err)
-		return false
-	}
-	if count == 0{
-		return false
-	}
-	// 存在此文章 新建此评论
-	err = databases.DB.Create(&cm).Error
-	if err != nil{
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
+//func CreatComment(cm *models.CommentInfo) bool {
+//	// 找这个文章id是否存在 不存在则false
+//	// 存在则创建
+//	var count = 0
+//	err := databases.DB.Model(&models.ArticleInfo{}).Where("id = ? ", cm.ArticleID).Count(&count).Error
+//	if err != nil{
+//		fmt.Println(err)
+//		return false
+//	}
+//	if count == 0{
+//		return false
+//	}
+//	// 存在此文章 新建此评论
+//	err = databases.DB.Create(&cm).Error
+//	if err != nil{
+//		fmt.Println(err)
+//		return false
+//	}
+//	return true
+//}
 
 // CommentLike 点赞/取消 评论 点赞redis
 func CommentLike(cm *models.CommentInfo, userId uint) bool {
 	t,err := databases.LikeComment(cm, userId)
 	if err != nil{
+		fmt.Println(err)
 		return false
 	}
 	return t
@@ -80,6 +83,7 @@ func CommentLike(cm *models.CommentInfo, userId uint) bool {
 func RemoveComment(cm *models.CommentInfo, userId uint) bool {
 	t,err := databases.CommentDelete(cm, userId)
 	if err != nil{
+		fmt.Println(err)
 		return false
 	}
 	return t
@@ -89,7 +93,6 @@ func RemoveComment(cm *models.CommentInfo, userId uint) bool {
 func FindAllArticleByUserId(u *models.UserInfo) (bool, []models.ArticleInfo){
 	t,err, articlePage:= databases.FindAllArticleByUserId(u)
 	if err != nil || articlePage == nil{
-		fmt.Println("service error 通过操作人id 获取所有文章")
 		fmt.Println(err)
 		return false, nil
 	}
@@ -119,7 +122,7 @@ func ArticleDetails(a *models.ArticleInfo) (bool, models.ArticleInfo,[]models.Co
 func SearchArticle(search models.Search) ([]models.ArticleInfo, bool) {
 	t,err, articles := databases.AccurateSearch(search)
 	if err != nil || !t{
-		fmt.Println(err,"111111111111server")
+		fmt.Println(err)
 		return nil, false
 	}
 	return articles,t
@@ -130,6 +133,7 @@ func CollectionArticle( collection *models.Collection) bool {
 	// 在数据库中查找是不是真的有这个文章，有的话就收藏 没有就失败
 	t,err := databases.CollectionArticle(collection)
 	if err != nil{
+		fmt.Println(err)
 		return false
 	}
 	return t
@@ -139,6 +143,7 @@ func CollectionArticle( collection *models.Collection) bool {
 func CancelCollectionArticle(collection *models.Collection) bool{
 	t,err := databases.CancelCollectionArticle(collection)
 	if err != nil{
+		fmt.Println(err)
 		return false
 	}
 	return t

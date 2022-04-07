@@ -55,6 +55,7 @@ func AccountInsert(u *models.UserInfo)  (bool, error){
 	u.Password = hex.EncodeToString(m.Sum(nil))
 	err := DB.Create(&u).Error
 	if err != nil{
+		fmt.Println(err)
 		return false, err
 	}
 	return true, nil

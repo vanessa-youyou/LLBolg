@@ -7,12 +7,13 @@ import (
 )
 
 // WriteNewArticles 新文章
-func WriteNewArticles(a *models.ArticleInfo) (bool, error) {
+func WriteNewArticles(a *models.ArticleInfo) bool {
 	err := DB.Create(&a).Error
 	if err != nil{
-		return false, err
+		fmt.Println(err)
+		return false
 	}
-	return true, nil
+	return true
 }
 
 // ArticleRemove 删除文章（删除前需要查证操作人是不是作者）
@@ -24,7 +25,6 @@ func ArticleRemove(a *models.ArticleInfo, userId uint) (bool, error) {
 		return false, err
 	}
 	if a.AuthorID != userId{
-		fmt.Println(a.AuthorID,"   ", userId)
 		fmt.Println("不是本人在操作")
 		return false, nil
 	}
@@ -47,7 +47,7 @@ func ArticleRemove(a *models.ArticleInfo, userId uint) (bool, error) {
 	var nc models.CommentInfo
 	err = DB.Model(&nc).Where("article_id = ?", a.ID).Delete(&models.CommentInfo{}).Error
 	if err != nil{
-		fmt.Println("数据库删除评论出错")
+		fmt.Println(err, "数据库删除评论出错")
 		return false, err
 	}
 
@@ -77,7 +77,7 @@ func ModifyArticle(a *models.ArticleInfo, userId uint) (bool, error) {
 		State: a.State,
 	}).Error
 	if err != nil{
-		fmt.Println("数据库更新出错")
+		fmt.Println(err, "数据库更新出错")
 		return false, err
 	}
 	return true, nil
@@ -101,23 +101,24 @@ func LikeArticle(a *models.ArticleInfo, userId uint) (bool, error) {
 }
 
 // NewComment 评论新建
-func NewComment(cm *models.CommentInfo) (bool, error) {
-
+func NewComment(cm *models.CommentInfo) bool {
 	var count int
 	// 1 检查表中有无文章
 	err := DB.Model(&models.ArticleInfo{}).Where("id = ? ", cm.ArticleID).Count(&count).Error
 	if err != nil{
-		return false, err
+		fmt.Println(err)
+		return false
 	}
 	if count == 0{
-		return false, nil
+		return false
 	}
 	// 存在此文章 新建此评论
 	err = DB.Create(&cm).Error
 	if err != nil{
-		return false, err
+		fmt.Println(err)
+		return false
 	}
-	return true, nil
+	return true
 }
 
 // FindAllArticleByUserId 查找个人文章通过操作人ID
@@ -125,6 +126,7 @@ func FindAllArticleByUserId(u *models.UserInfo) (bool, error, []models.ArticleIn
 	var article []models.ArticleInfo
 	err := DB.Model(&article).Where("author_id = ?", u.ID).Find(&article).Error
 	if err != nil{
+		fmt.Println(err)
 		return false, err, nil
 	}
 	// 应该再在redis中 找到每个文章的点赞量
@@ -139,6 +141,7 @@ func FindAllArticleByUserId(u *models.UserInfo) (bool, error, []models.ArticleIn
 		var count int
 		err = DB.Model(&models.CommentInfo{}).Where("article_id = ?", article[i].ID).Count(&count).Error
 		if err != nil{
+			fmt.Println(err)
 			return false, err, nil
 		}
 
@@ -177,6 +180,7 @@ func CollectionArticle(coll *models.Collection) (bool, error) {
 	// 1 检查表中有无文章
 	err := DB.Model(&models.ArticleInfo{}).Where("id = ? ", coll.ArticleID).Count(&count).Error
 	if err != nil{
+		fmt.Println(err)
 		return false, err
 	}
 	if count == 0{
@@ -185,6 +189,7 @@ func CollectionArticle(coll *models.Collection) (bool, error) {
 	// 存在 进行收藏
 	err = DB.Create(&coll).Error
 	if err != nil{
+		fmt.Println(err)
 		return false, err
 	}
 	return true, nil
@@ -195,7 +200,7 @@ func CancelCollectionArticle(coll *models.Collection) (bool, error) {
 	// 删除文章
 	err := DB.Model(&coll).Where("user_id = ? AND article_id = ?", coll.UserID, coll.ArticleID).Delete(&models.Collection{}).Error
 	if err != nil{
-		fmt.Println("数据库删除出错")
+		fmt.Println(err, "数据库删除出错")
 		return false, err
 	}
 	return true, nil

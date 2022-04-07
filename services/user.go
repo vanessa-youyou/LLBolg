@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"github.com/qiniu/api.v7/v7/auth/qbox"
 	"github.com/qiniu/api.v7/v7/storage"
 	"mime/multipart"
@@ -39,6 +40,7 @@ func RegisteredNameCheck(u models.UserInfo) bool {
 	cn, err := databases.AccountRechecking(u)
 	if err != nil {
 		// TODO 日志
+		fmt.Println(err)
 		return false
 	}
 	if !cn {
@@ -53,6 +55,7 @@ func RegisteredNameCheck(u models.UserInfo) bool {
 func AddAccount(u models.UserInfo) bool {
 	t, err := databases.AccountInsert(&u)
 	if err != nil {
+		fmt.Println(err)
 		return false
 	}
 	if !t {
@@ -65,6 +68,7 @@ func AddAccount(u models.UserInfo) bool {
 func UpdateUserInformation(u *models.UserInfo) bool {
 	t,err :=databases.UserInformationUpdate(u)
 	if err != nil {
+		fmt.Println(err)
 		return false
 	}
 	return t
@@ -75,6 +79,7 @@ func SearchUser(search models.Search) ([]models.UserInfo, bool) {
 
 	t,err,users := databases.SearchUser(search)
 	if err != nil || !t{
+		fmt.Println(err)
 		return nil, false
 	}
 	return users, true
