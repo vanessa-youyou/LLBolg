@@ -22,7 +22,7 @@ func InitRouter(router *gin.Engine) {
 		userGroup.DELETE("/deleteArticles", controllers.DeleteArticle)
 		// 评论
 		userGroup.POST("/newComment", controllers.WriteComment)
-		userGroup.POST("commentPick", controllers.CommentPick)	// redis
+		userGroup.POST("/commentPick", controllers.CommentPick)	// redis
 		userGroup.DELETE("/deleteComment", controllers.DeleteComment)
 
 		// 前段页面展示部分
@@ -37,6 +37,7 @@ func InitRouter(router *gin.Engine) {
 		// 收藏
 		userGroup.POST("/collectionArticle", controllers.CollectionArticle)
 		userGroup.DELETE("/CancelCollectionArticle", controllers.CancelCollectionArticle)
+		// 标签
 		}
 	testGroup := router.Group("/test")
 	{

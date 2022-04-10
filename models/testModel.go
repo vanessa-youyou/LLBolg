@@ -18,7 +18,7 @@ type ArticleInfo struct {
 	AuthorID    	uint	`json:"author_id" gorm:"column:author_id;type:int unsigned;not null"`
 	Original		int8	`json:"original" gorm:"column:original;not null"`
 	PlacedTop		int8	`json:"placed_top" gorm:"column:placed_top;not null"`
-		State		int	    `json:"state" gorm:"column:state;not null"`
+	State			int	    `json:"state" gorm:"column:state;not null"`
 	LikeNum			int		`json:"like_num" gorm:"like_num"`
 	CommentsNum		int		`json:"comments_num" gorm:"commentsNum"`
 }

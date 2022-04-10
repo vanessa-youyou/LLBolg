@@ -197,8 +197,7 @@ func CollectionArticle(coll *models.Collection) (bool, error) {
 
 // CancelCollectionArticle 取消收藏
 func CancelCollectionArticle(coll *models.Collection) (bool, error) {
-	// 删除文章
-	err := DB.Model(&coll).Where("user_id = ? AND article_id = ?", coll.UserID, coll.ArticleID).Delete(&models.Collection{}).Error
+	err := DB.Model(&coll).Where("article_id = ? AND user_id = ?", coll.ArticleID, coll.UserID).Delete(&models.Collection{}).Error
 	if err != nil{
 		fmt.Println(err, "数据库删除出错")
 		return false, err
