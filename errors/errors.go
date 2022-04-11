@@ -31,6 +31,8 @@ var SearchERROR = New(2010, "查找文章失败")
 var ObtainDetailsError = New(2011, "打开文章详情失败")
 var CollectionError = New(2012, "收藏文章失败")
 
+var CreatLabelError = New(2013, "创建标签失败")
+
 
 
 func New(code int, msg string) ErrorBase {

@@ -66,6 +66,24 @@ type Collection struct {
 	UserID    		uint	`json:"user_id" gorm:"column:user_id;type:int unsigned;not null"`
 }
 
+// Label 标签
+type Label struct {
+	ID			uint	`json:"id" gorm:"column:id"`
+	Name		string	`json:"name" gorm:"column:name"`
+}
+
+// LabelRelation 标签-文章关系表
+type LabelRelation struct {
+	ID			uint	`json:"id" gorm:"id"`
+	LabelId		uint	`json:"label_id" gorm:"label_id"`
+	ArticleId	uint	`json:"article_id" gorm:"article_id"`
+}
+// LabelReceive 只用于接收
+type LabelReceive struct {
+	LabelId		[]uint	`json:"label_id"`
+	ArticleId	uint 	`json:"article_id"`
+}
+
 func (u UserInfo) Clear() UserInfo {
 	u.Password = ""
 	return u

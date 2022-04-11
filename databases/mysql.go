@@ -41,5 +41,7 @@ func Init() {
 					&models.CommentInfo{},
 					&models.GiveLike{},
 					&models.CommentLike{},
-					&models.Collection{})
+					&models.Collection{},
+					&models.Label{},
+					&models.LabelRelation{})
 }

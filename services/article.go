@@ -37,6 +37,16 @@ func ArticleModify(a *models.ArticleInfo, userId uint) bool {
 	return t
 }
 
+// IsAuthorSelf 检验作者是否为本人
+func IsAuthorSelf(l models.LabelReceive, userId uint) bool{
+	t,err := databases.ChooseLabels(l, userId)
+	if err != nil{
+		fmt.Println(err)
+		return false
+	}
+	return t
+}
+
 // ArticleLike 点赞文章-redis
 func ArticleLike(a *models.ArticleInfo, userId uint) bool {
 	t,err := databases.LikeArticle(a, userId)

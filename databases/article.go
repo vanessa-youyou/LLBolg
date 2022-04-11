@@ -204,3 +204,84 @@ func CancelCollectionArticle(coll *models.Collection) (bool, error) {
 	}
 	return true, nil
 }
+
+// CreatLabel 创建标签
+func CreatLabel(label *models.Label) bool {
+	// 1 检查表中有无标签
+	var count = 0
+	err := DB.Model(&models.Label{}).Where("name = ? ", label.Name).Count(&count).Error
+	if err != nil{
+		fmt.Println(err)
+		return false
+	}
+	if count != 0{
+		return false
+	}
+	// 不存在此标签 新建
+	err = DB.Create(&label).Error
+	if err != nil{
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
+
+// SearchLabel 搜索标签
+func SearchLabel(label *models.Label) (bool, []models.Label) {
+	var labels []models.Label
+	err := DB.Model(&labels).Where("name Like ?", label.Name).Find(&labels).Error
+	if err != nil{
+		fmt.Println(err)
+		return false, nil
+	}
+	return true, labels
+}
+
+// ChooseLabels  为文章添加标签
+func ChooseLabels(labels models.LabelReceive, userId uint) (bool, error){
+	// 检查是否为本人
+	var article models.ArticleInfo
+	err := DB.Model(&article).Where("id = ?",labels.ArticleId).Find(&article).Error
+	if err != nil{
+		return false, err
+	}
+	if article.AuthorID != userId{
+		fmt.Println("不是本人在操作")
+		return false, nil
+	}
+
+	for i := 0; i < len(labels.LabelId); i++{
+		var count = 0
+		// 检查 是否有这个标签 没有的话 不可以创建
+		err := DB.Model(&models.Label{}).Where("id = ? ", labels.LabelId[i]).Count(&count).Error
+		if err != nil{
+			fmt.Println(err)
+			return false, err
+		}
+		if count == 0{
+			continue
+		}
+
+		count = 0
+		err = DB.Model(&models.LabelRelation{}).Where("label_id = ? AND article_id = ?",
+			labels.LabelId[i], labels.ArticleId).Count(&count).Error
+		if err != nil{
+			fmt.Println(err)
+			return false, err
+		}
+		if count != 0{
+			continue
+		}
+		// 不存在这个记录 可以创建
+		var labelNew = models.LabelRelation{}
+		labelNew.LabelId = labels.LabelId[i]
+		labelNew.ArticleId = labels.ArticleId
+
+		err = DB.Create(&labelNew).Error
+		if err != nil{
+			fmt.Println(err)
+			return false, err
+		}
+	}
+	return true, nil
+}

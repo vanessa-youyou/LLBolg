@@ -36,8 +36,14 @@ func InitRouter(router *gin.Engine) {
 		userGroup.POST("/articleDetails", controllers.ArticleDetails)
 		// 收藏
 		userGroup.POST("/collectionArticle", controllers.CollectionArticle)
-		userGroup.DELETE("/CancelCollectionArticle", controllers.CancelCollectionArticle)
+		userGroup.DELETE("/cancelCollectionArticle", controllers.CancelCollectionArticle)
+
 		// 标签
+		userGroup.POST("/creatLabel", controllers.CreatLabel)	// 新建标签
+		// 搜索标签
+		userGroup.POST("/searchLabel", controllers.SearchLabel)
+		// 为文章选择标签（传入的是 labels的列表）’
+		userGroup.POST("/chooseLabels", controllers.ChooseLabels)
 		}
 	testGroup := router.Group("/test")
 	{

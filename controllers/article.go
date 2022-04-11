@@ -392,3 +392,88 @@ func CancelCollectionArticle(c *gin.Context){
 		"message": " 取消成功 这里应该还在文章页面",
 	})
 }
+
+// CreatLabel 添加标签
+func CreatLabel(c *gin.Context)  {
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+	// 	获取参数
+	var label models.Label
+	err := c.ShouldBind(&label)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+
+	if !databases.CreatLabel(&label){
+		utils.Return(c, errors.CreatLabelError)
+		return
+	}
+
+	utils.Return(c, gin.H{
+		"message": " 创建标签成功 这里应该在文章页面",
+	})
+
+}
+
+// SearchLabel 搜索标签
+func SearchLabel(c *gin.Context)  {
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+	// 	获取参数
+	var label models.Label
+	err := c.ShouldBind(&label)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+
+	t, labels := databases.SearchLabel(&label)
+	if !t{
+		utils.Return(c, errors.CreatLabelError)
+		return
+	}
+
+	utils.Return(c, gin.H{
+		"Labels": labels,
+		"message": "搜索成功！",
+	})
+}
+
+// ChooseLabels 添加文章和 标签的关系
+func ChooseLabels(c *gin.Context)  {
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+	// 	获取参数
+	var labelRs models.LabelReceive
+	var err error
+	if err = c.ShouldBind(&labelRs); err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+
+	// 要检验一下 这个文章是不是本人写的
+	if !services.IsAuthorSelf(labelRs,auth.User.ID){
+		fmt.Println("IsAuthorSelf(labelRs,auth.User.ID){")
+		utils.Return(c, err)
+		return
+	}
+	utils.Return(c, gin.H{
+		"message": "添加成功！",
+	})
+}
