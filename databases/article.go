@@ -8,7 +8,7 @@ import (
 
 // SearchArticleById 查找文章 byId
 func SearchArticleById(article models.ArticleInfo) (bool, *models.ArticleInfo) {
-	err := DB.Model(&article).Where("author_id = ?", article.ID).Find(&article).Error
+	err := DB.Model(&article).Where("id = ?", article.ID).Find(&article).Error
 	if err != nil{
 		fmt.Println(err)
 		return false, &article

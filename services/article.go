@@ -114,7 +114,7 @@ func ArticleDetails(a *models.ArticleInfo) (bool, models.ArticleInfo,[]models.Co
 	// 按照文章id填写 文章
 	t, a := databases.SearchArticleById(*a)
 	if !t{
-		fmt.Println("错在dao中")
+		fmt.Println("错在dao中!!!")
 		return false, *a, nil
 	}
 	// 1 找到文章的all 评论，各个评论的赞
