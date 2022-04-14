@@ -6,6 +6,16 @@ import (
 	"strconv"
 )
 
+// SearchArticleById 查找文章 byId
+func SearchArticleById(article models.ArticleInfo) (bool, *models.ArticleInfo) {
+	err := DB.Model(&article).Where("author_id = ?", article.ID).Find(&article).Error
+	if err != nil{
+		fmt.Println(err)
+		return false, &article
+	}
+	return true, &article
+}
+
 // WriteNewArticles 新文章
 func WriteNewArticles(a *models.ArticleInfo) bool {
 	err := DB.Create(&a).Error
@@ -156,8 +166,9 @@ func FindAllArticleByUserId(u *models.UserInfo) (bool, error, []models.ArticleIn
 func ArticleDetails(a *models.ArticleInfo) (bool, []models.CommentInfo) {
 	// 1:根据 文章id 找到所有的评论。放到评论的数组里
 	var comments []models.CommentInfo
-	err := DB.Model(&comments).Where("author_id = ?", a.ID).Find(&comments).Error
+	err := DB.Model(&comments).Where("article_id = ?", a.ID).Find(&comments).Error
 	if err != nil{
+		fmt.Println("出错啦！err := DB.Model(&comments).Where(\"author_id = ?\", a.ID).Find(&comments).Error")
 		fmt.Println(err)
 		return false, nil
 	}
@@ -284,4 +295,35 @@ func ChooseLabels(labels models.LabelReceive, userId uint) (bool, error){
 		}
 	}
 	return true, nil
+}
+
+// FindTheLatestArticles 查找最新的公开文章
+func FindTheLatestArticles() (bool, error, []models.ArticleInfo) {
+	var article []models.ArticleInfo
+	err := DB.Order("id").Model(&article).Where("state = 4").Find(&article).Error
+	if err != nil{
+		fmt.Println(err)
+		return false, err, nil
+	}
+	// 应该再在redis中 找到每个文章的点赞量
+	for i := 0; i < len(article); i++ {
+		// 遍历文章 通过文章id找到 赞的数量 评论的数量
+		ArticleName := strconv.Itoa(int(article[i].ID))
+		ArticleName += "LikeArticle:"
+		likeNum := Redis.SCard(ArticleName).Val()
+		fmt.Println("Redis.SCard(ArticleName).Val() is", likeNum)
+
+		// 评论的数量
+		var count int
+		err = DB.Model(&models.CommentInfo{}).Where("article_id = ?", article[i].ID).Count(&count).Error
+		if err != nil{
+			fmt.Println(err)
+			return false, err, nil
+		}
+
+		article[i].LikeNum = int(likeNum)
+		article[i].CommentsNum = count
+	}
+
+	return true, nil, article
 }

@@ -69,6 +69,7 @@ func UserInformationUpdate(u *models.UserInfo) (bool, error) {
 		Introduction: u.Introduction,
 		Password: u.Password,
 		Label: u.Label,
+		HeadPortrait: u.HeadPortrait,
 	}).Error
 
 	if err != nil{

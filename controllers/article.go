@@ -319,6 +319,7 @@ func ArticleDetails(c *gin.Context)  {
 
 	t, articles, comments := services.ArticleDetails(&article)
 	if !t{
+		fmt.Println("出错拉！错误在service里")
 		utils.Return(c, errors.ObtainDetailsError)
 		return
 	}
@@ -475,5 +476,58 @@ func ChooseLabels(c *gin.Context)  {
 	}
 	utils.Return(c, gin.H{
 		"message": "添加成功！",
+	})
+}
+
+// HomePage 主页
+func HomePage(c *gin.Context)  {
+	// 登陆检验
+	auth := c.MustGet("auth").(core.AuthAuthorization)
+	if !auth.IsLogin(){
+		utils.Return(c, errors.IsNotLogin)
+		return
+	}
+
+	// 获取页数
+	var page models.Page
+	err := c.ShouldBind(&page)
+	if err != nil {
+		utils.Return(c, err)
+		fmt.Println("未接受到传递的信息")
+		return
+	}
+
+	// 通过个人id来获取相关信息(姓名 昵称 自我介绍 等级 性别)
+	selfInformation := auth.User
+
+	// 获取公开文章
+	t, articlePage := services.FindTheLatestArticles()
+	if !t{
+		fmt.Println("获取文章 error")
+		utils.Return(c, errors.ShowPageError)
+		return
+	}
+
+	// 翻页
+	// 获取文章后 能知道一共有几页，再按照现在的页面 制作切片 ，需要前端传过来的只有 当前page
+	// 设定1面展示 10片文章
+	page.PageSize = 10		// 一页展示10片文章
+	page.PageNum = len(articlePage)		//  总共有这么多片文章
+	beginA := (page.PageNow - 1)  * 10
+
+	var endA int
+	if beginA + 9 > page.PageNum{
+		endA = page.PageNum
+	}else {
+		endA = beginA + 9
+	}
+	pageArticle := articlePage[beginA : endA]		// pageArticle为 当前页面应该有的文章
+
+	// 返回
+	utils.Return(c, gin.H{
+		"pageMessage" : page,
+		"pageArticle" : pageArticle,
+		"selfPart" : selfInformation.Clear(),
+		"message": "获取成功 这里应该在个人页面",
 	})
 }

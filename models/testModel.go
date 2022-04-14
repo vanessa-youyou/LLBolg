@@ -87,5 +87,4 @@ type LabelReceive struct {
 func (u UserInfo) Clear() UserInfo {
 	u.Password = ""
 	return u
-
 }

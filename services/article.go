@@ -111,9 +111,16 @@ func FindAllArticleByUserId(u *models.UserInfo) (bool, []models.ArticleInfo){
 
 // ArticleDetails 文章详情
 func ArticleDetails(a *models.ArticleInfo) (bool, models.ArticleInfo,[]models.CommentInfo) {
+	// 按照文章id填写 文章
+	t, a := databases.SearchArticleById(*a)
+	if !t{
+		fmt.Println("错在dao中")
+		return false, *a, nil
+	}
 	// 1 找到文章的all 评论，各个评论的赞
 	t, comments := databases.ArticleDetails(a)
 	if !t{
+		fmt.Println("错在dao中")
 		return false, *a, nil
 	}
 	// 2 填上文章的评论数量
@@ -157,4 +164,14 @@ func CancelCollectionArticle(collection *models.Collection) bool{
 		return false
 	}
 	return t
+}
+
+// FindTheLatestArticles 找 最新的文章
+func FindTheLatestArticles() (bool, []models.ArticleInfo) {
+	t,err, articlePage:= databases.FindTheLatestArticles()
+	if err != nil || articlePage == nil{
+		fmt.Println(err)
+		return false, nil
+	}
+	return t, articlePage
 }

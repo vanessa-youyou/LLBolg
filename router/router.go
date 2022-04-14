@@ -44,6 +44,9 @@ func InitRouter(router *gin.Engine) {
 		userGroup.POST("/searchLabel", controllers.SearchLabel)
 		// 为文章选择标签（传入的是 labels的列表）’
 		userGroup.POST("/chooseLabels", controllers.ChooseLabels)
+
+		// 首页
+		userGroup.POST("/homePage", controllers.HomePage)
 		}
 	testGroup := router.Group("/test")
 	{
