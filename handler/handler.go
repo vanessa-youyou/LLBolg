@@ -1,4 +1,4 @@
-package middleware
+package handler
 
 import (
 	"LlBlog/errors"
@@ -7,14 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Response 登录态获取
-func Response() gin.HandlerFunc {
+// 基础函数
+func BaseHandler(fun func(*gin.Context) (interface{}, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
-		c.Next()
-		// 存在异常的话
-		if code, ok := c.Get("err"); ok {
-			switch err := code.(type) {
+		rsp, erro := fun(c)
+		if erro != nil {
+			switch err := erro.(type) {
 			case errors.ErrorBase:
 				c.JSON(http.StatusOK, gin.H{
 					"code": err.Code,
@@ -27,6 +25,8 @@ func Response() gin.HandlerFunc {
 					"msg":  err.Error(),
 				})
 			}
+		} else {
+			c.JSON(http.StatusOK, rsp)
 		}
 	}
 }

@@ -1,16 +1,14 @@
-package databases
-
+package dao
 
 import (
-	"github.com/go-redis/redis"
 	"os"
+
+	"github.com/go-redis/redis"
 )
-
-
 
 var Redis *redis.Client
 
-func InitRedis(){
+func redisInit() {
 	ip := os.Getenv("REDIS_IP")
 
 	if ip == "" {

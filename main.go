@@ -1,8 +1,6 @@
-
 package main
 
 import (
-	"LlBlog/databases"
 	"LlBlog/middleware"
 	"LlBlog/router"
 
@@ -17,9 +15,7 @@ func main() {
 	// 初始化路由
 	router.InitRouter(rou)
 	// 初始化数据库
-	databases.Init()
-	databases.InitRedis()
-	databases.LoadQiniu()
+	dao.Init()
 
 	rou.Run(":8080")
 }

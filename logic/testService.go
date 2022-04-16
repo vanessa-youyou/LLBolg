@@ -1,4 +1,4 @@
-package services
+package logic
 
 //type LoginUser struct {
 //	CustomerName string `json:"customer_name" form:"customer_name" `

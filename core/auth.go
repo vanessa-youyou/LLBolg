@@ -1,7 +1,7 @@
 package core
 
 import (
-	"LlBlog/databases"
+	"LlBlog/dao"
 	"LlBlog/errors"
 	"LlBlog/models"
 	"LlBlog/utils/hash"
@@ -73,7 +73,7 @@ func (r *AuthAuthorization) SetCookie(c *gin.Context, aid uint) {
 
 // 从数据库查找该用户
 func (r *AuthAuthorization) fetchAccount(aid int) bool {
-	user, err := databases.GetUserById(uint(aid))
+	user, err := dao.GetUserById(uint(aid))
 	if err != nil {
 		return false
 	}

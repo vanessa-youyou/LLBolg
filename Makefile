@@ -12,3 +12,6 @@ all:
 	make restart
 logs:
 	docker logs -f bolgsrv
+install:
+	go get -v -u github.com/lwhile/gogen
+	cd gogen go build -o gogen cmd/cmd.go
