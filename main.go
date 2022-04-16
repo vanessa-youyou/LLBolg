@@ -1,6 +1,7 @@
 package main
 
 import (
+	"LlBlog/dao"
 	"LlBlog/middleware"
 	"LlBlog/router"
 
@@ -10,7 +11,7 @@ import (
 func main() {
 	rou := gin.Default()
 	// Use 是用来做拦截的
-	rou.Use(middleware.Auth(), middleware.Response())
+	rou.Use(middleware.Auth())
 
 	// 初始化路由
 	router.InitRouter(rou)
