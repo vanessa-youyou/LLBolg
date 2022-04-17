@@ -8,6 +8,7 @@ var RegisteredFailed = New(10003, "注册失败")
 var IsNotLogin = New(10004, "尚未登录")
 var WrongUpdate = New(1005,"修改失败")
 var UpdatePasswordError = New(1006, "修改密码失败")
+var UserObtainError = New(1007, "获取失败")
 
 
 // 文章模块	2000~2999
@@ -32,8 +33,12 @@ var ObtainDetailsError = New(2011, "打开文章详情失败")
 var CollectionError = New(2012, "收藏文章失败")
 
 var CreatLabelError = New(2013, "创建标签失败")
+var SearchLabelError = New (2014, "搜索失败")
+var AddLabelError = New(2015, "添加标签到文章失败")
 
+// 其他错误 3000-3999
 
+var ReceiveParametersError = New(3001, "未获取到参数")
 
 func New(code int, msg string) ErrorBase {
 	return ErrorBase{

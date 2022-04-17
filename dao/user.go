@@ -1,10 +1,11 @@
 package dao
 
 import (
+	"LlBlog/dto"
 	"LlBlog/models"
-	"errors"
-
-	"github.com/jinzhu/gorm"
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
 )
 
 // databases应该关注于单纯的通用逻辑
@@ -27,24 +28,43 @@ func GetUserByCustomerName(cn string) (*models.UserInfo, error) {
 	return &u, nil
 }
 
-// AccountRechecking 账号查重
-func AccountRechecking(c models.UserInfo) (bool, error) {
-	var count int
-	err := DB.Model(&c).Where("customer_name = ?", c.CustomerName).Count(&count).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		// 没有相同的账号名 允许创建
-		if count == 0 {
-			return true, nil
-		}
-		return true, nil
+// UpdatePassword 修改密码
+func UpdatePassword(user *models.UserInfo, pwd dto.UpdatePasswordReq) bool {
+	m := md5.New()
+	m.Write([]byte(pwd.NewPassword))
+	newPsw := hex.EncodeToString(m.Sum(nil))
+	err := DB.Model(&user).Updates(models.UserInfo{
+		Password:     newPsw,
+	}).Error
+	if err != nil {
+		fmt.Println(err)
+		return false
 	}
-	if count == 0 {
-		return true, nil
-	}
-	return false, err
+	return true
 }
 
+// AccountRechecking 账号查重
+
+//func AccountRechecking(c models.UserInfo) (bool, error) {
+//	var count int
+//	err := DB.Model(&c).Where("customer_name = ?", c.CustomerName).Count(&count).Error
+//	if errors.Is(err, gorm.ErrRecordNotFound) {
+//		// 没有相同的账号名 允许创建
+//		if count == 0 {
+//			return true, nil
+//		}
+//		return true, nil
+//	}
+//	if count == 0 {
+//		return true, nil
+//	}
+//	return false, err
+//}
+
+
+
 // AccountInsert 添加账号
+
 // func AccountInsert(u *models.UserInfo) (bool, error) {
 // 	d := []byte(u.Password)
 // 	m := md5.New()
@@ -57,8 +77,11 @@ func AccountRechecking(c models.UserInfo) (bool, error) {
 // 	}
 // 	return true, nil
 // }
-//
+
+
+
 // // UserInformationUpdate 个人信息更新
+
 // func UserInformationUpdate(u *models.UserInfo) (bool, error) {
 // 	err := DB.Model(&u).Updates(models.UserInfo{
 // 		Name:         u.Name,
@@ -75,8 +98,10 @@ func AccountRechecking(c models.UserInfo) (bool, error) {
 // 	}
 // 	return true, nil
 // }
-//
+
+
 // // UpdateHeadPortrait 更新头像
+
 // func UpdateHeadPortrait(url string, u *models.UserInfo) (bool, error) {
 // 	err := DB.Model(&u).Updates(models.UserInfo{
 // 		HeadPortrait: url,
@@ -88,8 +113,11 @@ func AccountRechecking(c models.UserInfo) (bool, error) {
 // 	}
 // 	return true, nil
 // }
-//
+
+
+
 // // AccurateSearch 查询用户
+
 // func AccurateSearch(search models.Search) (bool, error, []models.ArticleInfo) {
 // 	var articles []models.ArticleInfo
 // 	var err error
@@ -132,25 +160,28 @@ func AccountRechecking(c models.UserInfo) (bool, error) {
 // 	return true, nil, articles
 //
 // }
-//
-// // SearchUser 查询用户
-// func SearchUser(search models.Search) (bool, error, []models.UserInfo) {
-// 	var user []models.UserInfo
-// 	var err error
-// 	if search.SearchWay {
-// 		// 准确查询
-// 		err = DB.Model(&models.UserInfo{}).Where("name = ?", search.Content).Find(&user).Error
-// 	} else {
-// 		err = DB.Model(&models.UserInfo{}).Where("name LIKE ?", search.Content+"%").Find(&user).Error
-// 	}
-// 	if err != nil {
-// 		fmt.Println("查找失败")
-// 		return false, err, nil
-// 	}
-// 	for i := 1; i < len(user); i++ {
-// 		// 不允许访客看到 customer_name,password,id
-// 		user[i].CustomerName = ""
-// 		user[i].Password = ""
-// 	}
-// 	return true, nil, user
-// }
+
+
+
+// SearchUser 查询用户
+
+func SearchUser(search dto.SearchUserReq) (bool, error, []models.UserInfo) {
+	var user []models.UserInfo
+	var err error
+	if search.SearchWay {
+		// 准确查询
+		err = DB.Model(&models.UserInfo{}).Where("name = ?", search.Content).Find(&user).Error
+	} else {
+		err = DB.Model(&models.UserInfo{}).Where("name LIKE ?", search.Content+"%").Find(&user).Error
+	}
+	if err != nil {
+		fmt.Println("查找失败")
+		return false, err, nil
+	}
+	for i := 1; i < len(user); i++ {
+		// 不允许访客看到 customer_name,password,id
+		user[i].CustomerName = ""
+		user[i].Password = ""
+	}
+	return true, nil, user
+}

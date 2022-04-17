@@ -4,7 +4,7 @@ package models
 type UserInfo struct {
 	ID           uint   `json:"id"`                                   // id
 	Name         string `json:"name" gorm:"not null"`                 // 昵称
-	Gender       string `json:"gender" gorm:"not null"`               // 性别
+	Gender       string `json:"gender" `               // 性别
 	Password     string `json:"password" gorm:"not null"`             // 密码
 	CustomerName string `json:"customer_name" gorm:"not null;unique"` // 用户名
 	Introduction string `json:"introduction"`                         // 个人介绍

@@ -1,8 +1,12 @@
 package logic
 
 import (
+	"LlBlog/dao"
+	"LlBlog/dto"
+	"LlBlog/models"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 )
 
 // type UpdatePassword struct {
@@ -11,11 +15,12 @@ import (
 // 	AgainPassword    string `json:"again_password" form:"again_password"`
 // }
 //
+
 // LoginCheck 登录时候的密码校验
 func LoginCheck(payload, password string) bool {
-	d := []byte(payload)
+	//d := []byte(payload)
 	m := md5.New()
-	m.Write(d)
+	m.Write([]byte(payload))
 	return password == hex.EncodeToString(m.Sum(nil))
 }
 
@@ -35,7 +40,7 @@ func LoginCheck(payload, password string) bool {
 // 	}
 // 	return true
 // }
-//
+
 // // AddAccount 增加用户
 // func AddAccount(u models.UserInfo) bool {
 // 	t, err := databases.AccountInsert(&u)
@@ -48,7 +53,7 @@ func LoginCheck(payload, password string) bool {
 // 	}
 // 	return true
 // }
-//
+
 // // UpdateUserInformation 用户信息进行更新
 // func UpdateUserInformation(u *models.UserInfo) bool {
 // 	t, err := databases.UserInformationUpdate(u)
@@ -58,18 +63,18 @@ func LoginCheck(payload, password string) bool {
 // 	}
 // 	return t
 // }
-//
-// // SearchUser 查找用户
-// func SearchUser(search models.Search) ([]models.UserInfo, bool) {
-//
-// 	t, err, users := databases.SearchUser(search)
-// 	if err != nil || !t {
-// 		fmt.Println(err)
-// 		return nil, false
-// 	}
-// 	return users, true
-// }
-//
+
+// SearchUser 查找用户
+func SearchUser(search dto.SearchUserReq) ([]models.UserInfo, bool) {
+
+	t, err, users := dao.SearchUser(search)
+	if err != nil || !t {
+		fmt.Println(err)
+		return nil, false
+	}
+	return users, true
+}
+
 // // UploadFile 上传
 // func UploadFile(file multipart.File, fileSize int64) (string, error) {
 // 	var Bucket = databases.Bucket
@@ -99,8 +104,9 @@ func LoginCheck(payload, password string) bool {
 // 	url := ImgUrl + ret.Key
 // 	return url, nil
 // }
-//
+
 // // UpdateHeadPortrait 上传/更新头像
+
 // func UpdateHeadPortrait(url string, user *models.UserInfo) bool {
 // 	// 对此人进行update 头像
 // 	t, err := databases.UpdateHeadPortrait(url, user)
@@ -109,20 +115,21 @@ func LoginCheck(payload, password string) bool {
 // 	}
 // 	return t
 // }
-//
-// // CheckPassword 旧密码的校验：
-// func (u UpdatePassword) CheckPassword(user *models.UserInfo) bool {
-// 	d := []byte(u.OriginalPassword)
-// 	m := md5.New()
-// 	m.Write(d)
-// 	u.OriginalPassword = hex.EncodeToString(m.Sum(nil))
-// 	// 取出密码 （根据id取出信息）
-// 	var err error
-// 	user, err = databases.GetUserById(user.ID)
-// 	if err != nil {
-// 		return false
-// 	}
-//
+
+// CheckPassword 旧密码的校验：
+
+//func (u UpdatePassword) CheckPassword(user *models.UserInfo) bool {
+//	d := []byte(u.OriginalPassword)
+//	m := md5.New()
+//	m.Write(d)
+//	u.OriginalPassword = hex.EncodeToString(m.Sum(nil))
+//	// 取出密码 （根据id取出信息）
+//	var err error
+//	user, err = databases.GetUserById(user.ID)
+//	if err != nil {
+//		return false
+//	}
+
 // 	if u.OriginalPassword != user.Password {
 // 		return false
 // 	}

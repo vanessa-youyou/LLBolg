@@ -7,6 +7,9 @@ import (
 func Register(router *gin.Engine) {
 	// 用户模块
 	registerUser(router)
+	// 文章模块
+	registerArticle(router)
+
 }
 
 // func InitRouter(router *gin.Engine) {

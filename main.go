@@ -14,7 +14,7 @@ func main() {
 	rou.Use(middleware.Auth())
 
 	// 初始化路由
-	router.InitRouter(rou)
+	router.Register(rou)
 	// 初始化数据库
 	dao.Init()
 

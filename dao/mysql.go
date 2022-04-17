@@ -40,14 +40,14 @@ func mysqlInit() {
 	DB.Callback().Update().Before("gorm:update").Register("update_time_in_update", updateTimeForUpdateCallback)
 
 	// 应该放在这里
-	DB.AutoMigrate(&models.UserInfo{})
-	// &models.ArticleInfo{},
-	// &models.CommentInfo{},
-	// &models.GiveLike{},
-	// &models.CommentLike{},
-	// &models.Collection{},
-	// &models.Label{},
-	// &models.LabelRelation{})
+	DB.AutoMigrate( &models.UserInfo{},
+					&models.ArticleInfo{},
+					&models.CommentInfo{},
+					&models.GiveLike{},
+					&models.CommentLike{},
+					&models.Collection{})
+					//&models.Label{},
+					//&models.LabelRelation{})
 }
 
 // 更新创建时间
